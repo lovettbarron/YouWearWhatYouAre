@@ -29,9 +29,9 @@ public:
     void configure();
     void add(ofCanvas * _canvas);
     void saveHomography();
-    void loadHomography( string * path );
+    bool loadHomography( string * path );
     
-    void loadMap(string * path);
+    bool loadMap(string * path);
     void parseMap(ofImage * map);
     
     void mousePressed( int x, int y, int button);

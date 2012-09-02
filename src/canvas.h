@@ -17,6 +17,7 @@ public:
     void configure();
     void add(ofFace * face);
 
+    ofFbo frame;
     ofFace & get(int index);
     int width;
     int height;

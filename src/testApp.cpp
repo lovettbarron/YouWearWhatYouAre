@@ -24,21 +24,16 @@ void testApp::setup() {
     panel.addSlider("minNeighbors",1, 1, 5,true);
     panel.addSlider("minSize",0, 1, 400,true);
     panel.addSlider("maxSize",100, 1, 400,true);
-    panel.addLabel("Background Subtraction");
-    panel.addSlider("learningTime",900,0,2000,true);
-    panel.addSlider("backgroundThresh",10,0,50,true);
+    panel.addLabel("Debug switches");
     panel.addToggle("resetFaces", false);
     panel.addToggle("debug",false);
     
     ofBackground(0);
     
+    // Allocate and setup openCV methods
     cam.initGrabber(640, 480);
     thresh.allocate(640, 480, OF_IMAGE_GRAYSCALE);
     bgThresh.allocate(640,480,OF_IMAGE_GRAYSCALE);
-    background.setThresholdValue(panel.getValueI("backgroundThresh"));
-    background.setLearningTime(panel.getValueI("learningTime"));
-
-    
     scaleFactor = panel.getValueF("faceScale");
     classifier.load(ofToDataPath("haarcascade_frontalface_alt2.xml"));
     graySmall.allocate(cam.getWidth() * scaleFactor, cam.getHeight() * scaleFactor, OF_IMAGE_GRAYSCALE);
@@ -47,29 +42,24 @@ void testApp::setup() {
 }
 
 void testApp::update() {
-    background.setLearningTime(panel.getValueI("learningTime"));
-    background.setThresholdValue(panel.getValueI("backgroundThresh"));
+    // Reallocates and scales the image being passed to the classifier
     if(scaleFactor != panel.getValueF("faceScale")) {
             graySmall.allocate(cam.getWidth() * panel.getValueF("faceScale"), cam.getHeight() * panel.getValueF("faceScale"), OF_IMAGE_GRAYSCALE);
     }
+    
     scaleFactor = panel.getValueF("faceScale");
-    if(panel.getValueB("debug")) {
-        debug = true;
-    } else {
-        debug = false;
-    }
-    cam.update();
+    
+    if(panel.getValueB("debug")) debug = true;
+    else debug = false;
+    
     if(panel.getValueB("resetFaces")) {
         faces.clear();
         panel.setValueB("resetFaces",false);
     }
+    //Updates camera
+    cam.update();
     if(cam.isFrameNew()) {
-            //convertColor(cam, thresh, CV_RGB2GRAY);
-//        background.update(cam, thresh);
-//        thresh.update();
-//
-//
-//        
+
         //Face Tracking stuff
         convertColor(cam, gray, CV_RGB2GRAY);
         resize(gray, graySmall);
@@ -97,36 +87,28 @@ void testApp::draw() {
     ofPushMatrix();
         ofTranslate(panelWidth, 0);
         ofSetColor(255);
-        if(debug) {
-            cam.draw(0, 0);
-            contourFinder.draw();
-            
-            graySmall.draw(cam.width, 0, 2, 256,192);
-            thresh.draw(cam.width, 192, 2, 256,192);
-            ofNoFill();
-            ofPushMatrix();
-            ofScale(1 / scaleFactor, 1 / scaleFactor);
-            for(int i = 0; i < objects.size(); i++) {
-                ofLog() << "Drawing face #" << ofToString(i);
-                ofRect(toOf(objects[i]));
-            }
-            ofPopMatrix();
-        }
-    
-        ofPushMatrix();
-            if(debug) {
-                ofScale(.1,.1);
-                int offset = 0;
-                for(int i=0; i<faces.size(); i++) {
-                    faces[i].draw(offset,0);
-                    offset += faces[i].radius;
-                }
-            }
-            //ofScale(.4,.4);
-        ofPopMatrix();
+        debugDraw();
         ofNoFill();
         canvas1->draw(0,0);
     ofPopMatrix(); // For panel
+}
+
+void testApp::debugDraw() {
+    if(debug) {
+        cam.draw(0, 0);
+        contourFinder.draw();
+        
+        graySmall.draw(cam.width, 0, 2, 256,192);
+        thresh.draw(cam.width, 192, 2, 256,192);
+        ofNoFill();
+        ofPushMatrix();
+        ofScale(1 / scaleFactor, 1 / scaleFactor);
+        for(int i = 0; i < objects.size(); i++) {
+            ofLog() << "Drawing face #" << ofToString(i);
+            ofRect(toOf(objects[i]));
+        }
+        ofPopMatrix();
+    }
 }
 
 void testApp::keyPressed(int key) {

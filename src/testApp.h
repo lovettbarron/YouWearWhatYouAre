@@ -14,14 +14,13 @@ public:
     void draw();
     void mouseMoved(int x, int y);
     void keyPressed( int key );
-    
+    void debugDraw();
     vector<ofVec3f> points;
     ofTrueTypeFont raleway;
     
     ofxAutoControlPanel panel;
     ofImage thresh;
     ofImage bgThresh;
-    ofxCv::RunningBackground background;
 
     int panelWidth;
     bool debug;

@@ -579,8 +579,8 @@
 				83ED9B1B15EDC0CF004B584F /* face.cpp */,
 				83ED9B1D15EDD544004B584F /* canvas.h */,
 				83ED9B1E15EDD561004B584F /* canvas.cpp */,
-				830DB6E215F3D0080048DB85 /* projectionManager.cpp */,
 				830DB6E415F3D0160048DB85 /* projectionManager.h */,
+				830DB6E215F3D0080048DB85 /* projectionManager.cpp */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;

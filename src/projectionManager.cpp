@@ -33,8 +33,8 @@ void ofxProjectionManager::saveHomography() {
     
 }
 
-void ofxProjectionManager::loadHomography( string * path) {
-    
+bool ofxProjectionManager::loadHomography( string * path) {
+    return false;
 }
 
 
@@ -45,8 +45,14 @@ void ofxProjectionManager::add(ofCanvas * canvas) {
 
 }
 
-void ofxProjectionManager::loadMap(string * path) {
-    
+bool ofxProjectionManager::loadMap(string * path) {
+    ofFile previous(*path);
+    if(previous.exists()) {
+        FileStorage fs(ofToDataPath(*path), FileStorage::READ);
+        fs[*path] >> homography;
+        matrixReady = true;
+    }
+    return false;
 }
 
 void ofxProjectionManager::parseMap(ofImage * map) {
@@ -54,8 +60,8 @@ void ofxProjectionManager::parseMap(ofImage * map) {
 }
 
 void ofxProjectionManager::update() {
-    for(int i=0; i<canvas.size; i++) {
-        canvas.draw();
+    for(int i=0; i<canvas.size(); i++) {
+        canvas.draw(0,0);
     }
 }
 

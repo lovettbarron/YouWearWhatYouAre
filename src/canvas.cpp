@@ -10,6 +10,7 @@ ofCanvas::ofCanvas()
     padding = 0.1;
     newFaceTimer = 0;
     newFaceTimerThresh = 30;
+    frame.allocate(width, height,GL_RGBA);
  }
 
 ofCanvas::~ofCanvas() 
@@ -99,9 +100,11 @@ void ofCanvas::update() {
 }
 
 void ofCanvas::draw(int _x, int _y) {
-    for(int i=0;i<canvas.size();i++) {
-        canvas[i].draw();
-    }
+    frame.begin();
+        for(int i=0;i<canvas.size();i++) {
+            canvas[i].draw();
+        }
+    frame.end();
 }
 
 void ofCanvas::configure() {
