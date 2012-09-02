@@ -1,0 +1,21 @@
+<faceScale>
+    <val_0>0.0975</val_0>
+</faceScale>
+<minAreaRadius>
+    <val_0>7</val_0>
+</minAreaRadius>
+<maxAreaRadius>
+    <val_0>100</val_0>
+</maxAreaRadius>
+<learningTime>
+    <val_0>900</val_0>
+</learningTime>
+<backgroundThresh>
+    <val_0>10</val_0>
+</backgroundThresh>
+<resetFaces>
+    <val_0>0</val_0>
+</resetFaces>
+<debug>
+    <val_0>0</val_0>
+</debug>
