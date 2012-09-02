@@ -11,7 +11,7 @@ ofxProjectionManager::ofxProjectionManager()
     saveMatrix = false;
     loadMatrix = false;
     matrixReady = false;
-
+    movingPoint = false;
     saveImage = false;
     
     
@@ -37,6 +37,16 @@ bool ofxProjectionManager::loadHomography( string * path) {
     return false;
 }
 
+bool ofxProjectionManager::movePoint(vector<ofVec2f>& points, ofVec2f point) {
+    for(int i = 0; i < points.size(); i++) {
+        if(points[i].distance(point) < 20) {
+            movingPoint = true;
+            curPoint = &points[i];
+            return true;
+        }
+    }
+    return false;
+}
 
 /******************************************
  Manage canvases
@@ -90,13 +100,13 @@ void ofxProjectionManager::reset() {
 void ofxProjectionManager::mousePressed(int x, int y, int button) {
     if(isConfigHomograph) {
         ofVec2f cur(x, y);
-        ofVec2f rightOffset(left.getWidth(), 0);
-        if(!movePoint(leftPoints, cur) && !movePoint(rightPoints, cur)) {
-           if(x > left.getWidth()) {
+        ofVec2f rightOffset(source.width, 0);
+        if(!movePoint(source, cur) && !movePoint(destination, cur)) {
+           if(x > screen.getWidth()) {
                cur -= rightOffset;
            }
-           leftPoints.push_back(cur);
-           rightPoints.push_back(cur + rightOffset);
+           source.push_back(cur);
+           destination.push_back(cur + rightOffset);
         }
     }
 }
@@ -111,7 +121,7 @@ void ofxProjectionManager::mouseReleased(int x, int y, int button) {
    movingPoint = false;
 }
 
-void testApp::keyPressed(int key) {
+void ofxProjectionManager::keyPressed(int key) {
    if(key == ' ') {
        saveMatrix = true;
    }

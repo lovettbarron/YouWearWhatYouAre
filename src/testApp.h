@@ -22,13 +22,19 @@ public:
     ofImage thresh;
     ofImage bgThresh;
 
+        //TEST
+    ofImage testMap;
+    ofPolyline testPoly;
+		ofxCv::ContourFinder contourFinder;
+        //TEST
+    
+    
     int panelWidth;
     bool debug;
     
     float threshold;
     ofVideoGrabber cam;
     cv::Mat currentFrame;
-    ofxCv::ContourFinder contourFinder;
     bool showLabels;
     
     //Face track

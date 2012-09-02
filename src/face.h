@@ -18,21 +18,23 @@ public:
     
     int x;
     int y;
+    float scale;
     ofVec3f loc;
     float tween; // Multiplied by radius to control anim
     float tweenStep; // Stepping the tween value
-    
     ofPoint center;
     int radius;
     bool bActive;
     long age;
     int resolution;
+    void scaleToMap(ofImage * _map);
     
     float distance(ofVec3f point);
     
     ofImage theFace;
     ofVec3f cvFaceLocation();
     ofVec3f faceLocation;
+    float getRadius();
     
     // This is for tracking still active faces
     float inactiveTimer;

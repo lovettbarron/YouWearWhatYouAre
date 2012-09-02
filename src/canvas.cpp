@@ -1,10 +1,13 @@
 #include "ofMain.h"
 #include "canvas.h"
 
-ofCanvas::ofCanvas()
+ofCanvas::ofCanvas(ofVec3f _pos, ofImage _map, ofPolyline _border)
 {
-    width = 640;
-    height = 480;
+    pos = _pos;
+    border = _border;
+    map = _map;
+    width = map.width;
+    height = map.height;
     cx = width/2;
     cy = height/2;
     padding = 0.1;
@@ -67,14 +70,16 @@ void ofCanvas::update() {
         for (int i = 0; i < canvas.size() - 1; i++)
         {
             canvas[i].update();
+            canvas[i].scaleToMap(&map);
             for (int j = i + 1; j < canvas.size(); j++)
             {
-                
+                    
                 if (i == j)
                     continue;
                 
                 ofVec2f AB = canvas[j].center - canvas[i].center;
-                float r = canvas[i].radius + canvas[j].radius;
+                
+                float r = canvas[i].getRadius() + canvas[j].getRadius();
                 
                 
                     // Length squared = (dx * dx) + (dy * dy);
@@ -94,7 +99,7 @@ void ofCanvas::update() {
                 }
                 
             }
-        }
+         }
     }
 
 }

@@ -11,6 +11,7 @@ ofFace::ofFace(ofImage & _face, ofVec3f _faceLocation, ofVec3f _circleLoc)
         //    x = ofRandom(0,ofGetWidth());
         //    y = ofRandom(0,ofGetHeight());
     radius = ofRandom(10,ofGetWidth()/10);
+    scale = 1.0;
     bActive = true;
     resolution = 64;
     genCircle();
@@ -47,9 +48,18 @@ void ofFace::update() {
     else if (tween > 1.0) tween = 1.0f;
     
     tweenStep += tweenStep / 2;
-    
     center = ofPoint(x,y);
     age += 1;
+}
+
+void ofFace::scaleToMap(ofImage * _map) {
+    int index = loc.x + (loc.y * _map->width) * 3;
+    int color = _map->getPixels()[index];
+    scale = color / 255;
+}
+
+float ofFace::getRadius() {
+    return radius * scale;
 }
 
 ofVec3f ofFace::cvFaceLocation() {
@@ -86,7 +96,7 @@ void ofFace::draw(int _x, int _y) {
         glBegin(GL_POLYGON);                  
         for(int i = 0; i < circleTex.size(); i++){  
             glTexCoord2f(circleTex[i].x, circleTex[i].y);
-            glVertex2f( circle[i].x * (radius*tween),  circle[i].y * (radius*tween));  
+            glVertex2f( circle[i].x * (radius*tween)*scale,  circle[i].y * (radius*tween)*scale);  
         }  
         glEnd();  
         theFace.unbind();  
@@ -96,7 +106,7 @@ void ofFace::draw(int _x, int _y) {
         glColor4f(1.0,0,0,.7);
         for(int i = 0; i < circle.size(); i++){  
             if( i > circle.size() * (1-inactiveTimer)) glColor3f(0,0,0);
-            glVertex2f( circle[i].x * (radius*tween+2),  circle[i].y * (radius*tween+2));  
+            glVertex2f( circle[i].x * (radius*tween+2)*scale,  circle[i].y * (radius*tween+2)*scale);  
         }
         glEnd();
     }

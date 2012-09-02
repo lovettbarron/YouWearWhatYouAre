@@ -38,7 +38,35 @@ void testApp::setup() {
     classifier.load(ofToDataPath("haarcascade_frontalface_alt2.xml"));
     graySmall.allocate(cam.getWidth() * scaleFactor, cam.getHeight() * scaleFactor, OF_IMAGE_GRAYSCALE);
     debug = false;
-    canvas1 = new ofCanvas();
+    
+    testMap.loadImage("test_thresh.jpg");
+    ofImage testMapGray;
+    testMapGray.allocate(testMap.width, testMap.height, OF_IMAGE_GRAYSCALE);
+    int grayIndex = 0;
+    // Create the grayscale image based off the 100% green
+    for (int i = 2; i < (testMap.width*testMap.height); i+3){
+        if(testMap.getPixels()[i] == 255) {
+            testMapGray.getPixelsRef()[grayIndex] = 255;
+        } else {
+            testMapGray.getPixelsRef()[grayIndex] = 0;
+        }
+        grayIndex++;
+    }
+    contourFinder.findContours(toCv(testMapGray));
+    testPoly.addVertexes(contourFinder.getContour(0));
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    canvas1 = new ofCanvas(ofVec3f(0,0,0), testMap, testPoly);
 }
 
 void testApp::update() {

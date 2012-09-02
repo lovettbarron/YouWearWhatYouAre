@@ -30,6 +30,11 @@ public:
     void add(ofCanvas * _canvas);
     void saveHomography();
     bool loadHomography( string * path );
+    void updateHomography();
+    bool movePoint(vector<ofVec2f>& points, ofVec2f point);
+    
+    vector<ofVec3f> destination;
+    vector<ofVec3f> source;
     
     bool loadMap(string * path);
     void parseMap(ofImage * map);
@@ -38,18 +43,22 @@ public:
     void mouseDragged( int x, int y, int button);
     void mouseReleased( int x, int y, int button);
     
-    void updateHomography();
-    
+    // Homography state
     bool isConfigHomograph;
     bool saveMatrix;
     bool loadMatrix;
+    bool movingPoint;
     bool matrixReady;
+    
+    // Canvas frame states
     bool saveImage;
     
     float rotation;
 
     ofVec3f skew;
     cv::Mat homography;
+    
+    ofFbo screen;
     
     vector<ofVec2f> drawnPoints;
     vector<ofPolyline> canvasShapes;

@@ -8,16 +8,19 @@ class ofCanvas {
     
 public:
     
-    ofCanvas();
+    ofCanvas(ofVec3f _pos, ofImage _map, ofPolyline _border);
     ~ofCanvas();
     
     void update();
     void draw(int _x, int _y);
+    void draw();
     void reset();
     void configure();
     void add(ofFace * face);
 
+    ofVec3f pos;
     ofFbo frame;
+    ofImage map;
     ofFace & get(int index);
     int width;
     int height;
@@ -30,7 +33,9 @@ public:
     int newFaceTimer;
     int newFaceTimerThresh;
     vector<ofFace> canvas;
+    ofPolyline border;
     
+    float sizeOnMap(ofFace * _face);
     void compareWithStillActive( vector<ofFace> * _faces);
     
 private:
