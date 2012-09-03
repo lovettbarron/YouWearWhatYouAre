@@ -17,10 +17,12 @@ public:
     void reset();
     void configure();
     void add(ofFace * face);
-
+    void testImages();
     ofVec3f pos;
     ofFbo frame;
     ofImage map;
+    ofPolyline border;
+    void drawBoundingLines();
     ofFace & get(int index);
     int width;
     int height;
@@ -33,7 +35,6 @@ public:
     int newFaceTimer;
     int newFaceTimerThresh;
     vector<ofFace> canvas;
-    ofPolyline border;
     
     float sizeOnMap(ofFace * _face);
     void compareWithStillActive( vector<ofFace> * _faces);

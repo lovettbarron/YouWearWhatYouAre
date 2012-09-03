@@ -26,6 +26,7 @@ void testApp::setup() {
     panel.addSlider("maxSize",100, 1, 400,true);
     panel.addLabel("Debug switches");
     panel.addToggle("resetFaces", false);
+    panel.addToggle("add100Faces", false);
     panel.addToggle("debug",false);
     
     ofBackground(0);
@@ -41,30 +42,48 @@ void testApp::setup() {
     
     testMap.loadImage("test_thresh.jpg");
     ofImage testMapGray;
+    ofImage testMapCopy = testMap;
     testMapGray.allocate(testMap.width, testMap.height, OF_IMAGE_GRAYSCALE);
     int grayIndex = 0;
     // Create the grayscale image based off the 100% green
-    for (int i = 2; i < (testMap.width*testMap.height); i+3){
-        if(testMap.getPixels()[i] == 255) {
-            testMapGray.getPixelsRef()[grayIndex] = 255;
+/*    for (int i = 0; i < testMap.getPixelsRef().size()-3; i+=3){
+        if(testMap.getPixelsRef()[i+1] >= 250) {
+            testMap.getPixelsRef()[(i)] = 255;
+            testMap.getPixelsRef()[(i+1)] = 255;
+            testMap.getPixelsRef()[(i+2)] = 255;
+            
         } else {
-            testMapGray.getPixelsRef()[grayIndex] = 0;
+            testMap.getPixelsRef()[(i)] = 0;
+            testMap.getPixelsRef()[(i+1)] = 0;
+            testMap.getPixelsRef()[(i+2)] = 0;
         }
-        grayIndex++;
+    }*/
+    contourFinder.setTargetColor(ofColor(0,255,0), TRACK_COLOR_RGB);
+    contourFinder.setInvert(true);
+    contourFinder.setThreshold(127);
+        //    contourFinder.setTargetColor(ofColor(0,255,0));
+        //    cv::Mat contourImage;
+        //    cv::threshold(testMap, contourImage);
+        //    convertColor(testMap,contourImage,CV_RGB2GRAY);
+        //    autothreshold(contourImage);
+    contourFinder.findContours(testMap);
+    ofLog() << "Number of polylines: " << ofToString(contourFinder.size());
+    if(contourFinder.size() != 0 ) {
+        vector<ofPolyline> polylines;
+        polylines = contourFinder.getPolylines();
+        for(int i=0; i<polylines.size(); i++) {
+            ofLog() << "Polyline" << ofToString(i) << " has " << ofToString(polylines[i].size());
+            if(i==0) testPoly = polylines[i];
+            if(polylines[i].size() >= testPoly.size()) testPoly = polylines[i];
+        }
+        ofLog() << "Found contours: " << ofToString(testPoly.size());
+    } else {
+        ofLog() << "Defaulting to image box";
+        testPoly.addVertex(ofVec2f(0,0));
+        testPoly.addVertex(ofVec2f(ofGetWidth(),0));
+        testPoly.addVertex(ofVec2f(ofGetWidth(), ofGetHeight()));
+        testPoly.addVertex(ofVec2f(0, ofGetHeight()));
     }
-    contourFinder.findContours(toCv(testMapGray));
-    testPoly.addVertexes(contourFinder.getContour(0));
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     canvas1 = new ofCanvas(ofVec3f(0,0,0), testMap, testPoly);
 }
@@ -83,6 +102,10 @@ void testApp::update() {
     if(panel.getValueB("resetFaces")) {
         faces.clear();
         panel.setValueB("resetFaces",false);
+    }
+    if(panel.getValueB("add100Faces")) {
+        canvas1->testImages();
+        panel.setValueB("add100Faces",false);
     }
     //Updates camera
     cam.update();
@@ -117,6 +140,7 @@ void testApp::draw() {
         ofSetColor(255);
         debugDraw();
         ofNoFill();
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE); 
         canvas1->draw(0,0);
     ofPopMatrix(); // For panel
 }
@@ -124,10 +148,10 @@ void testApp::draw() {
 void testApp::debugDraw() {
     if(debug) {
         cam.draw(0, 0);
-        contourFinder.draw();
+        //contourFinder.draw();
         
         graySmall.draw(cam.width, 0, 2, 256,192);
-        thresh.draw(cam.width, 192, 2, 256,192);
+        testMap.draw(cam.width, 192, 2, 256,192);
         ofNoFill();
         ofPushMatrix();
         ofScale(1 / scaleFactor, 1 / scaleFactor);

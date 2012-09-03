@@ -13,7 +13,7 @@ ofCanvas::ofCanvas(ofVec3f _pos, ofImage _map, ofPolyline _border)
     padding = 0.1;
     newFaceTimer = 0;
     newFaceTimerThresh = 30;
-    frame.allocate(width, height,GL_RGBA);
+    frame.allocate(width, height, GL_RGBA);
  }
 
 ofCanvas::~ofCanvas() 
@@ -23,6 +23,28 @@ ofCanvas::~ofCanvas()
 
 //Translated from http://www.openprocessing.org/sketch/57395
 // second try: http://www.codeproject.com/Articles/42067/2D-Circle-Packing-algorithm-ported-to-C
+
+void ofCanvas::drawBoundingLines() {
+    for(int i=0; i< (int) border.size(); i++ ) {
+        bool repeatNext = i == border.size() - 1;
+        
+        const ofPoint& cur = border[i];
+        const ofPoint& next = repeatNext ? border[0] : border[i + 1];
+        
+        float angle = atan2f(next.y - cur.y, next.x - cur.x) * RAD_TO_DEG;
+        float distance = cur.distance(next);
+        
+        if(repeatNext) {
+            ofSetColor(255, 0, 255);
+        }
+        glPushMatrix();
+        glTranslatef(cur.x, cur.y, 0);
+        ofRotate(angle);
+        ofLine(0, 0, 0, distance);
+        ofLine(0, 0, distance, 0);
+        glPopMatrix();
+    }
+}
 
 bool ofCanvas::compare(ofFace* face1, ofFace* face2) {    
     float d1 = face1->distance(ofVec2f(cx,cy));
@@ -71,6 +93,7 @@ void ofCanvas::update() {
         {
             canvas[i].update();
             canvas[i].scaleToMap(&map);
+                //ofLog() << "Scale " << ofToString(canvas[i].scale);
             for (int j = i + 1; j < canvas.size(); j++)
             {
                     
@@ -92,24 +115,64 @@ void ofCanvas::update() {
                     AB.normalize();
                     
                     AB *= (float)((r - sqrt(d)) * 0.5f);
-                    canvas[j].x += AB.x;
-                    canvas[j].y += AB.y;
-                    canvas[i].x -= AB.x;
-                    canvas[i].y -= AB.y;
+                    int ax = canvas[j].x + AB.x;
+                    int ay = canvas[j].y + AB.y;
+                    int bx = canvas[i].x - AB.x;
+                    int by = canvas[i].y - AB.y;
+                    // Checks if the face is within the polyLine
+                    if(border.inside(ax, ay)) { // && border.inside(ax-r, ay-r)
+                        canvas[j].x += AB.x;
+                        canvas[j].y += AB.y;
+                    }
+                    if(border.inside(bx,by)) { // && border.inside(bx-r, by-r)
+                        canvas[i].x -= AB.x;
+                        canvas[i].y -= AB.y;
+                    }
                 }
                 
             }
          }
     }
-
+    
+    // Draw to FBO
+//    frame.begin();
+//    glClear(GL_COLOR_BUFFER_BIT);
+//    glPushAttrib(GL_ALL_ATTRIB_BITS);
+//    
+//    glEnable(GL_BLEND);
+//    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,GL_ONE,GL_ONE_MINUS_SRC_ALPHA);
+//    map.draw(0,0);
+//    for(int i=0;i<canvas.size();i++) {
+//        canvas[i].draw();
+//    }
+//    border.draw();
+//    glDisable(GL_BLEND);
+//    glPopAttrib();
+//    frame.end();
 }
 
 void ofCanvas::draw(int _x, int _y) {
-    frame.begin();
-        for(int i=0;i<canvas.size();i++) {
-            canvas[i].draw();
-        }
-    frame.end();
+    ofPushMatrix();
+    ofTranslate(0,0);
+    ofScale(.4,.4);
+        //    ofEnableAlphaBlending();
+        //    frame.draw(0,0);
+    
+    map.draw(0,0);
+    for(int i=0;i<canvas.size();i++) {
+        canvas[i].draw();
+    }
+        // ofSetColor(255,0,0);
+        //border.draw();
+    drawBoundingLines();
+    
+    
+        //    ofDisableAlphaBlending();
+    ofPopMatrix();
+    GLboolean isDepthTesting;
+    glGetBooleanv(GL_DEPTH_TEST, &isDepthTesting);
+    if(isDepthTesting == GL_TRUE)
+        glDisable(GL_DEPTH_TEST);
 }
 
 void ofCanvas::configure() {
@@ -123,6 +186,16 @@ void ofCanvas::add(ofFace * face) {
 
 void ofCanvas::reset() {
 
+}
+
+void ofCanvas::testImages() {
+    for(int i=0;i<50;i++) {
+        ofImage random;
+            //random.cropFrom(map,map.width/2,map.height/2,100,100);
+        random = canvas[ofRandom(0,canvas.size()-1)].theFace;
+        ofFace newFace = ofFace(random, ofVec3f(pos.x + (width/2), pos.y + (height/2),0),ofVec3f(width/2+ofRandom(-5,5),height/2+ofRandom(-5,5),0));
+        canvas.push_back(newFace);
+    }
 }
 
 int ofCanvas::size() {

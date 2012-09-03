@@ -27,14 +27,18 @@ public:
     void draw();
     void reset();
     void configure();
-    void add(ofCanvas * _canvas);
+    //Add uses contour finder to gen the poly line
+    void add(ofVec3f* _pos, ofImage* _map);
+    ofxCv::ContourFinder contourFinder;
+    
     void saveHomography();
     bool loadHomography( string * path );
     void updateHomography();
     bool movePoint(vector<ofVec2f>& points, ofVec2f point);
     
-    vector<ofVec3f> destination;
-    vector<ofVec3f> source;
+    vector<ofVec2f> destination;
+    vector<ofVec2f> source;
+    ofVec2f* curPoint;
     
     bool loadMap(string * path);
     void parseMap(ofImage * map);
@@ -42,6 +46,7 @@ public:
     void mousePressed( int x, int y, int button);
     void mouseDragged( int x, int y, int button);
     void mouseReleased( int x, int y, int button);
+    void keyPressed(int key);
     
     // Homography state
     bool isConfigHomograph;

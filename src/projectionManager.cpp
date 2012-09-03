@@ -51,8 +51,23 @@ bool ofxProjectionManager::movePoint(vector<ofVec2f>& points, ofVec2f point) {
 /******************************************
  Manage canvases
  *******************************************/
-void ofxProjectionManager::add(ofCanvas * canvas) {
-
+void ofxProjectionManager::add(ofVec3f* _pos, ofImage* _map) {
+    ofImage mapGray;
+    mapGray.allocate(_map->width, _map->height, OF_IMAGE_GRAYSCALE);
+    int grayIndex = 0;
+        // Create the grayscale image based off the 100% green
+    for (int i = 2; i < (_map->width*_map->height); i+3){
+        if(_map->getPixels()[i] == 255) {
+            mapGray.getPixelsRef()[grayIndex] = 255;
+        } else {
+            mapGray.getPixelsRef()[grayIndex] = 0;
+        }
+        grayIndex++;
+    }
+    contourFinder.findContours(toCv(mapGray));
+    ofPolyline poly  = contourFinder.getPolylines()[0];
+    
+    canvas.push_back(ofCanvas(ofVec3f(0,0,0),*_map,poly));
 }
 
 bool ofxProjectionManager::loadMap(string * path) {
@@ -71,7 +86,7 @@ void ofxProjectionManager::parseMap(ofImage * map) {
 
 void ofxProjectionManager::update() {
     for(int i=0; i<canvas.size(); i++) {
-        canvas.draw(0,0);
+        canvas[i].draw();
     }
 }
 
@@ -100,7 +115,7 @@ void ofxProjectionManager::reset() {
 void ofxProjectionManager::mousePressed(int x, int y, int button) {
     if(isConfigHomograph) {
         ofVec2f cur(x, y);
-        ofVec2f rightOffset(source.width, 0);
+        ofVec2f rightOffset(screen.getWidth(), 0);
         if(!movePoint(source, cur) && !movePoint(destination, cur)) {
            if(x > screen.getWidth()) {
                cur -= rightOffset;

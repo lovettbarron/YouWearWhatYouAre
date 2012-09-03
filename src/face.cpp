@@ -32,6 +32,7 @@ ofFace::~ofFace()
 }
 
 void ofFace::update() {
+    loc = ofVec3f(x,y,0);
     if(circle.size() <= 1) {
         genCircle();
     }
@@ -53,9 +54,13 @@ void ofFace::update() {
 }
 
 void ofFace::scaleToMap(ofImage * _map) {
-    int index = loc.x + (loc.y * _map->width) * 3;
-    int color = _map->getPixels()[index];
-    scale = color / 255;
+    int index = (ofClamp(x,0,_map->width) + (ofClamp(y,0,_map->height) * _map->width)) * 3;
+    int color = _map->getPixelsRef()[index];
+    color += _map->getPixelsRef()[index+1];
+    color += _map->getPixelsRef()[index+2];
+        //ofLog() << "The color is " << color;
+    scale = color / (255*3);
+    if(scale == 0) scale = 0.1;
 }
 
 float ofFace::getRadius() {
@@ -88,6 +93,7 @@ bool ofFace::isWithinRange(ofVec3f _difference) {
 
 void ofFace::draw(int _x, int _y) {
     glEnable(GL_DEPTH_TEST);
+
     glPushMatrix();  
         glTranslatef(_x,_y,0.0f);
         glColor4f(1.0f,1.0f,1.0f,1.0f);
@@ -112,7 +118,23 @@ void ofFace::draw(int _x, int _y) {
     }
     
     glPopMatrix();
+    
     glDisable(GL_DEPTH_TEST);
+/*
+    ofPushMatrix();
+    ofTranslate(_x,_y,0.0f);
+        string stats;
+        stats = "age: " + ofToString(age);
+        ofDrawBitmapString(stats,0, 0);
+        stats = "radius: " + ofToString(radius);
+        ofDrawBitmapString(stats,0, 0);
+        stats = "scale: " + ofToString(scale);
+        ofDrawBitmapString(stats,0, 0);
+        stats = "age: " + ofToString(age);
+        ofDrawBitmapString(stats,0, 0);
+        stats = "x: " + ofToString(loc.x) + " y: " + ofToString(loc.y);
+        ofDrawBitmapString(stats,0, 0);
+    ofPopMatrix();*/
 }
 
 void ofFace::draw() {
