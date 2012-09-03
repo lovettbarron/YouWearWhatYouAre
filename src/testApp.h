@@ -6,6 +6,7 @@
 
 #include "face.h"
 #include "canvas.h"
+#include "projectionManager.h"
 
 class testApp : public ofBaseApp{
 public:
@@ -23,11 +24,12 @@ public:
     ofImage bgThresh;
 
         //TEST
-    ofImage testMap;
-    ofPolyline testPoly;
-		ofxCv::ContourFinder contourFinder;
+//   ofImage testMap;
+//    ofPolyline testPoly;
+//		ofxCv::ContourFinder contourFinder;
         //TEST
     
+    ofxProjectionManager* manager;
     
     int panelWidth;
     bool debug;

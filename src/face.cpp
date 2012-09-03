@@ -13,7 +13,7 @@ ofFace::ofFace(ofImage & _face, ofVec3f _faceLocation, ofVec3f _circleLoc)
     radius = ofRandom(10,ofGetWidth()/10);
     scale = 1.0;
     bActive = true;
-    resolution = 64;
+    resolution = 32;
     genCircle();
     center = ofVec3f(x,y);
 
@@ -55,6 +55,7 @@ void ofFace::update() {
 
 void ofFace::scaleToMap(ofImage * _map) {
     int index = (ofClamp(x,0,_map->width) + (ofClamp(y,0,_map->height) * _map->width)) * 3;
+    ofLog() << "Index: " << ofToString(index);
     int color = _map->getPixelsRef()[index];
     color += _map->getPixelsRef()[index+1];
     color += _map->getPixelsRef()[index+2];

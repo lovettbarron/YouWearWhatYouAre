@@ -23,10 +23,11 @@ public:
     ofxProjectionManager();
     ~ofxProjectionManager();
     
-    void update();
+    void update(ofImage* _cam, vector<cv::Rect>* _obj);
     void draw();
     void reset();
     void configure();
+    int numberOfCanvases();
     //Add uses contour finder to gen the poly line
     void add(ofVec3f* _pos, ofImage* _map);
     ofxCv::ContourFinder contourFinder;
@@ -58,7 +59,6 @@ public:
     // Canvas frame states
     bool saveImage;
     bool isConfigCanvases;
-    
     float rotation;
 
     ofVec3f skew;
@@ -68,7 +68,16 @@ public:
     
     vector<ofVec2f> drawnPoints;
     vector<ofPolyline> canvasShapes;
-    vector<ofCanvas> canvas;
+    
+    // Methods and variables to track
+    // and smooth face rec
+    float scaleFactor;
+    void filterFace(ofImage* cam, cv::Rect* objects);
+    void delegateToCanvas(ofImage _face, int x, int y, int w, int h);
+    vector<ofCanvas> * canvases;
+    vector<ofFace> trackedFaces;
+    vector<Rect> smoothing;
+    int faceSmoothing;
     
     
 };

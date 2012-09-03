@@ -3,6 +3,7 @@
 
 ofCanvas::ofCanvas(ofVec3f _pos, ofImage _map, ofPolyline _border)
 {
+    ofLog() << "'Lo, a new canvas is born";
     pos = _pos;
     border = _border;
     map = _map;
@@ -13,7 +14,7 @@ ofCanvas::ofCanvas(ofVec3f _pos, ofImage _map, ofPolyline _border)
     padding = 0.1;
     newFaceTimer = 0;
     newFaceTimerThresh = 30;
-    frame.allocate(width, height, GL_RGBA);
+        //frame.allocate(width, height, GL_RGBA);
  }
 
 ofCanvas::~ofCanvas() 
@@ -169,10 +170,10 @@ void ofCanvas::draw(int _x, int _y) {
     
         //    ofDisableAlphaBlending();
     ofPopMatrix();
-    GLboolean isDepthTesting;
-    glGetBooleanv(GL_DEPTH_TEST, &isDepthTesting);
-    if(isDepthTesting == GL_TRUE)
-        glDisable(GL_DEPTH_TEST);
+}
+
+void ofCanvas::draw() {
+    draw(0,0);
 }
 
 void ofCanvas::configure() {
@@ -195,6 +196,7 @@ void ofCanvas::testImages() {
         random = canvas[ofRandom(0,canvas.size()-1)].theFace;
         ofFace newFace = ofFace(random, ofVec3f(pos.x + (width/2), pos.y + (height/2),0),ofVec3f(width/2+ofRandom(-5,5),height/2+ofRandom(-5,5),0));
         canvas.push_back(newFace);
+        
     }
 }
 
