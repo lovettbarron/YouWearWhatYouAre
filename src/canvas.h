@@ -16,6 +16,9 @@ public:
     void draw();
     void reset();
     void configure();
+    void select();
+    void deselect();
+    bool selected;
     void add(ofFace * face);
     void testImages();
     ofVec3f pos;

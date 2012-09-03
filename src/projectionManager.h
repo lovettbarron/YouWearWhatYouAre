@@ -57,6 +57,7 @@ public:
     
     // Canvas frame states
     bool saveImage;
+    bool isConfigCanvases;
     
     float rotation;
 

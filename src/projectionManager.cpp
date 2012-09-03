@@ -85,9 +85,7 @@ void ofxProjectionManager::parseMap(ofImage * map) {
 }
 
 void ofxProjectionManager::update() {
-    for(int i=0; i<canvas.size(); i++) {
-        canvas[i].draw();
-    }
+
 }
 
 /******************************************
@@ -95,7 +93,14 @@ void ofxProjectionManager::update() {
 *******************************************/
 
 void ofxProjectionManager::draw() {
+    for(int i=0; i<canvas.size(); i++) {
+        canvas[i].draw();
+    }
+    
+    
+    
     if(isConfigHomograph) {
+        
     }
 }
 
@@ -124,12 +129,33 @@ void ofxProjectionManager::mousePressed(int x, int y, int button) {
            destination.push_back(cur + rightOffset);
         }
     }
+    
+    if(isConfigCanvases) {
+        for(int i=0;i<canvas.size();i++) {
+            ofVec3f loc = canvas[i].pos;
+            if(loc.x < x && loc.x+canvas[i].width > x) {
+                if(loc.y < y && loc.y+canvas[i].height > y) {
+                    canvas[i].select();
+                }
+            }
+        }
+    }
 }
 
 void ofxProjectionManager::mouseDragged(int x, int y, int button) {
    if(movingPoint) {
        curPoint->set(x, y);
    }
+    if(isConfigCanvases) {
+        for(int i=0;i<canvas.size();i++) {
+            ofVec3f loc = canvas[i].pos;
+            if(loc.x < x && loc.x+canvas[i].width > x) {
+                if(loc.y < y && loc.y+canvas[i].height > y) {
+                    canvas[i].select();
+                }
+            }
+        }
+    }
 }
 
 void ofxProjectionManager::mouseReleased(int x, int y, int button) {

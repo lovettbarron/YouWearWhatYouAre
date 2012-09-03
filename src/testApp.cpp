@@ -136,7 +136,7 @@ void testApp::draw() {
         //ofSetBackgroundAuto(true);
     ofBackground(100);
     ofPushMatrix();
-        ofTranslate(panelWidth, 0);
+        //ofTranslate(panelWidth, 0);
         ofSetColor(255);
         debugDraw();
         ofNoFill();
