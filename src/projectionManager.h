@@ -16,13 +16,14 @@
 #include "face.h"
 #include "canvas.h"
 
-class ofxProjectionManager {
+class ofxProjectionManager: public ofBaseApp {
     
 public:
     
-    ofxProjectionManager();
-    ~ofxProjectionManager();
-    
+        //    ofxProjectionManager();
+        //    ~ofxProjectionManager();
+    void setup();
+
     void update(ofImage* _cam, vector<cv::Rect>* _obj);
     void draw();
     void reset();

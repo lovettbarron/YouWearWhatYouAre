@@ -21,10 +21,10 @@ public:
     bool selected;
     void add(ofFace * face);
     void testImages();
-    ofVec3f pos;
+    ofVec3f * pos;
     ofFbo frame;
-    ofImage map;
-    ofPolyline border;
+    ofImage * map;
+    ofPolyline * border;
     void drawBoundingLines();
     ofFace & get(int index);
     int width;

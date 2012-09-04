@@ -18,6 +18,7 @@ ofxProjectionManager::ofxProjectionManager()
         //ofCanvas tempCanvas;
     vector<ofFace*> faces;
     vector<ofCanvas*> canvases;
+    canvases = *new vector<ofCanvas*>;
 }
 
 ofxProjectionManager::~ofxProjectionManager() 
