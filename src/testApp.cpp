@@ -53,9 +53,9 @@ void testApp::setup() {
     
     ofImage jacket;
     jacket.loadImage("test_thresh.jpg");
-    ofVec3f loc = ofVec3f(0,0,0);
-    ofxProjectionManager manager = *new ofxProjectionManager();
-    manager.add(&loc, &jacket);
+    ofVec3f * loc = new ofVec3f(0,0,0);
+    ofxProjectionManager* manager = new ofxProjectionManager();
+    manager->add(*loc, jacket);
 }
 
 void testApp::update() {

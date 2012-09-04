@@ -29,7 +29,7 @@ public:
 //		ofxCv::ContourFinder contourFinder;
         //TEST
     
-    ofxProjectionManager* manager;
+    ofxProjectionManager * manager;
     
     int panelWidth;
     bool debug;

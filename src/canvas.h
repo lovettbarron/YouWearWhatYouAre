@@ -8,7 +8,7 @@ class ofCanvas {
     
 public:
     
-    ofCanvas(ofVec3f _pos, ofImage _map, ofPolyline _border);
+    ofCanvas(ofVec3f* _pos, ofImage* _map, ofPolyline* _border);
     ~ofCanvas();
     
     void update();

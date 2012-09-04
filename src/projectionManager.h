@@ -28,8 +28,9 @@ public:
     void reset();
     void configure();
     int numberOfCanvases();
+    
     //Add uses contour finder to gen the poly line
-    void add(ofVec3f* _pos, ofImage* _map);
+    void add(ofVec3f& _pos, ofImage& _map);
     ofxCv::ContourFinder contourFinder;
     
     void saveHomography();
@@ -40,7 +41,7 @@ public:
     vector<ofVec2f> destination;
     vector<ofVec2f> source;
     ofVec2f* curPoint;
-    
+        //ofCanvas tempCanvas;
     bool loadMap(string * path);
     void parseMap(ofImage * map);
     
@@ -67,18 +68,25 @@ public:
     ofFbo screen;
     
     vector<ofVec2f> drawnPoints;
-    vector<ofPolyline> canvasShapes;
     
     // Methods and variables to track
     // and smooth face rec
     float scaleFactor;
     void filterFace(ofImage* cam, cv::Rect* objects);
+    ofPolyline getContour(ofImage * map);
     void delegateToCanvas(ofImage _face, int x, int y, int w, int h);
-    vector<ofCanvas> * canvases;
-    vector<ofFace> trackedFaces;
+    vector<ofCanvas*> canvases;
+    vector<ofFace*> faces;
+    vector<ofFace*> trackedFaces;
     vector<Rect> smoothing;
+    ofImage * map;
+    ofImage * mapCopy;
+    ofPolyline * poly;
     int faceSmoothing;
     
-    
+private:
+    ofCanvas * canvas1;
+    ofCanvas * canvas2;
+    ofCanvas * canvas3;
 };
 #endif

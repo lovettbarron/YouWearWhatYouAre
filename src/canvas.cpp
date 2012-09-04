@@ -1,12 +1,12 @@
 #include "ofMain.h"
 #include "canvas.h"
 
-ofCanvas::ofCanvas(ofVec3f _pos, ofImage _map, ofPolyline _border)
+ofCanvas::ofCanvas(ofVec3f * _pos, ofImage * _map, ofPolyline * _border)
 {
     ofLog() << "'Lo, a new canvas is born";
-    pos = _pos;
-    border = _border;
-    map = _map;
+    pos = *_pos;
+    border = *_border;
+    map = *_map;
     width = map.width;
     height = map.height;
     cx = width/2;

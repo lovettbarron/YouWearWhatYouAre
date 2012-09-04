@@ -1,4 +1,5 @@
 #include "ofMain.h"
+#include "canvas.h"
 #include "projectionManager.h"
 
 using namespace ofxCv;
@@ -6,7 +7,7 @@ using namespace cv;
 
 
 ofxProjectionManager::ofxProjectionManager()
-{
+{    
     isConfigHomograph = false; // If currently configuring transform
     saveMatrix = false;
     loadMatrix = false;
@@ -14,7 +15,9 @@ ofxProjectionManager::ofxProjectionManager()
     movingPoint = false;
     saveImage = false;
     scaleFactor = 1.0;
-    canvases = new vector<ofCanvas>;
+        //ofCanvas tempCanvas;
+    vector<ofFace*> faces;
+    vector<ofCanvas*> canvases;
 }
 
 ofxProjectionManager::~ofxProjectionManager() 
@@ -22,49 +25,33 @@ ofxProjectionManager::~ofxProjectionManager()
     
 }
 
-/******************************************
-    Homographic transforms + img change
-*******************************************/
-void ofxProjectionManager::updateHomography() {
-    
-}
-
-void ofxProjectionManager::saveHomography() {
-    
-}
-
-bool ofxProjectionManager::loadHomography( string * path) {
-    return false;
-}
-
-bool ofxProjectionManager::movePoint(vector<ofVec2f>& points, ofVec2f point) {
-    for(int i = 0; i < points.size(); i++) {
-        if(points[i].distance(point) < 20) {
-            movingPoint = true;
-            curPoint = &points[i];
-            return true;
-        }
-    }
-    return false;
-}
 
 /******************************************
  Manage canvases
  *******************************************/
     // Add a canvas to the vector from image and position.
-void ofxProjectionManager::add(ofVec3f* _pos, ofImage* _map) {
-    ofImage map = *_map;
-    ofImage mapCopy = *_map;
+void ofxProjectionManager::add(ofVec3f& _pos, ofImage& _map) {
+    ofImage * map = &_map;
+    ofImage * mapCopy = &_map;
     
+    ofPolyline poly = getContour(map);
+    
+    canvases.push_back( new ofCanvas(new ofVec3f(0,0,0), map, &poly) );
+    ofLog() << "Canvases added, size " << ofToString(canvases.size());
+}
+
+ofPolyline ofxProjectionManager::getContour(ofImage * map) {
     ofPolyline poly;
-    mapCopy.allocate(map.width, map.height, OF_IMAGE_GRAYSCALE);
+    ofImage * mapCopy = new ofImage;
+    mapCopy->clone(*map);
+    mapCopy->allocate(map->width, map->height, OF_IMAGE_GRAYSCALE);
     contourFinder.setTargetColor(ofColor(0,255,0), TRACK_COLOR_RGB);
     contourFinder.setInvert(true);
     contourFinder.setThreshold(127);
-    contourFinder.findContours(map);
+    contourFinder.findContours(toCv(*map));
     
     ofLog() << "Number of polylines: " << ofToString(contourFinder.size());
-
+    
     if(contourFinder.size() != 0 ) {
         vector<ofPolyline> polylines;
         polylines = contourFinder.getPolylines();
@@ -74,19 +61,10 @@ void ofxProjectionManager::add(ofVec3f* _pos, ofImage* _map) {
             if(polylines[i].size() >= poly.size()) poly = polylines[i];
         }
         ofLog() << "Found contours: " << ofToString(poly.size());
-    } else {
-        ofLog() << "Defaulting to image box";
-        poly.addVertex(ofVec2f(0,0));
-        poly.addVertex(ofVec2f(ofGetWidth(),0));
-        poly.addVertex(ofVec2f(ofGetWidth(), ofGetHeight()));
-        poly.addVertex(ofVec2f(0, ofGetHeight()));
-    }
-    ofCanvas tempCanvas = *new ofCanvas(ofVec3f(0,0,0),map,poly);
-    canvases->push_back(tempCanvas);
-    ofLog() << "Canvases added, size " << ofToString(canvases->size());
+    } 
+
+    return poly;
 }
-
-
 
 bool ofxProjectionManager::loadMap(string * path) {
     ofFile previous(*path);
@@ -110,8 +88,8 @@ void ofxProjectionManager::update(ofImage* _cam, vector<cv::Rect>* _obj) {
         cv::Rect obj = _obj->at(i);
         filterFace(_cam,&obj);
     }
-    for(int i=0;i<canvases->size();i++) {
-        canvases->at(i).update();
+    for(int i=0;i<canvases.size();i++) {
+        canvases[i]->update();
     }
 }
 
@@ -134,15 +112,15 @@ void ofxProjectionManager::filterFace(ofImage* cam, cv::Rect * objects) {
 
 void ofxProjectionManager::delegateToCanvas(ofImage _face, int x, int y, int w, int h) {
     int index = 0;
-    for(int i=0;i<canvases->size();i++) {
-        if(canvases[i].size() < canvases[index].size()) {
+    for(int i=0;i<canvases.size();i++) {
+        if(canvases[i]->size() < canvases[index]->size()) {
             index = i;
         }
     }
-    if(canvases->size()>0) {
-            // The new face
-        ofFace theFace = ofFace(_face, ofVec3f(x + (w/2), y + (h/2),0),ofVec3f(canvases->at(index).width+ofRandom(-5,5),canvases->at(index).height+ofRandom(-5,5),0));
-        vector<ofFace>* faces = &canvases->at(index).canvas; // Faces stored in canvases
+    if(canvases.size()>0) {
+        // The new face
+        ofFace theFace = ofFace(_face, ofVec3f(x + (w/2), y + (h/2),0),ofVec3f(canvases[index]->width+ofRandom(-5,5),canvases[index]->height+ofRandom(-5,5),0));
+        vector<ofFace>* faces = &canvases[index]->canvas; // Faces stored in canvases
         faces->push_back( theFace );
             //        canvases[index].compareWithStillActive( &faces )
     }
@@ -153,17 +131,15 @@ void ofxProjectionManager::delegateToCanvas(ofImage _face, int x, int y, int w, 
 *******************************************/
 
 void ofxProjectionManager::draw() {
-    ofLog() << "Size of array" << ofToString(canvases->size());
-    for(int i=0; i<canvases->size(); i++) {
-        canvases->at(i).draw(0,0);
-        ofLog() << "Drawing canvases" << ofToString(i);
-    }
+        ofLog() << "Size of array" << ofToString(canvases.size());
+        for(int i=0; i<canvases.size(); i++) {
+            canvases[i]->draw(0,0);
+            ofLog() << "Drawing canvases" << ofToString(i);
+            }
     
     
     
-    if(isConfigHomograph) {
-        
-    }
+
     GLboolean isDepthTesting;
     glGetBooleanv(GL_DEPTH_TEST, &isDepthTesting);
     if(isDepthTesting == GL_TRUE)
@@ -197,14 +173,14 @@ void ofxProjectionManager::mousePressed(int x, int y, int button) {
     }
     
     if(isConfigCanvases) {
-        for(int i=0;i<canvases->size();i++) {
-            ofVec3f loc = canvases->at(i).pos;
-            if(loc.x < x && loc.x+canvases->at(i).width > x) {
-                if(loc.y < y && loc.y+canvases->at(i).height > y) {
-                    canvases->at(i).select();
-                }
-            }
-        }
+//        for(int i=0;i<canvases->size();i++) {
+//            ofVec3f loc = canvases->at(i).pos;
+//            if(loc.x < x && loc.x+canvases->at(i).width > x) {
+//                if(loc.y < y && loc.y+canvases->at(i).height > y) {
+//                    canvases->at(i).select();
+//                }
+//            }
+//        }
     }
 }
 
@@ -213,19 +189,19 @@ void ofxProjectionManager::mouseDragged(int x, int y, int button) {
        curPoint->set(x, y);
    }
     if(isConfigCanvases) {
-        for(int i=0;i<canvases->size();i++) {
-            ofVec3f loc = canvases->at(i).pos;
-            if(loc.x < x && loc.x+canvases->at(i).width > x) {
-                if(loc.y < y && loc.y+canvases->at(i).height > y) {
-                    canvases->at(i).select();
-                }
-            }
-        }
+//        for(int i=0;i<canvases->size();i++) {
+//            ofVec3f loc = canvases->at(i).pos;
+//            if(loc.x < x && loc.x+canvases->at(i).width > x) {
+//                if(loc.y < y && loc.y+canvases->at(i).height > y) {
+//                    canvases->at(i).select();
+//                }
+//            }
+//        }
     }
 }
 
 int ofxProjectionManager::numberOfCanvases() {
-    return canvases->size();
+    return canvases.size();
 }
 
 void ofxProjectionManager::mouseReleased(int x, int y, int button) {
@@ -237,3 +213,30 @@ void ofxProjectionManager::keyPressed(int key) {
        saveMatrix = true;
    }
 }
+
+/******************************************
+ Homographic transforms + img change
+ *******************************************/
+void ofxProjectionManager::updateHomography() {
+    
+}
+
+void ofxProjectionManager::saveHomography() {
+    
+}
+
+bool ofxProjectionManager::loadHomography( string * path) {
+    return false;
+}
+
+bool ofxProjectionManager::movePoint(vector<ofVec2f>& points, ofVec2f point) {
+    for(int i = 0; i < points.size(); i++) {
+        if(points[i].distance(point) < 20) {
+            movingPoint = true;
+            curPoint = &points[i];
+            return true;
+        }
+    }
+    return false;
+}
+
