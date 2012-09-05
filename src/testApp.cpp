@@ -90,6 +90,7 @@ ofPolyline testApp::getContour(ofImage * map) {
 
     // Update takes in new frame data and passes it to the canvas
 void testApp::update() {
+    updateConditional();
     updateCamera();
     
         // convertColor(graySmall, curCVFrame,CV_8UC1);
@@ -159,8 +160,18 @@ void testApp::draw() {
     }
     ofPopMatrix();
     
-    
-    
+    if(debug) {
+    ofPushMatrix();
+        ofTranslate(ofGetWidth()-cam.width,ofGetWidth()-cam.width);
+        cam.draw(0,0);
+        ofScale(1 / scaleFactor, 1 / scaleFactor);
+        for(int i = 0; i < objects.size(); i++) {
+            ofLog() << "Drawing face #" << ofToString(i);
+            ofRect(toOf(objects[i]));
+        }
+    ofPopMatrix();
+        
+    }
     
     GLboolean isDepthTesting;
     glGetBooleanv(GL_DEPTH_TEST, &isDepthTesting);

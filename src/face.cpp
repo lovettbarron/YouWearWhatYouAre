@@ -53,20 +53,22 @@ void ofFace::update() {
     age += 1;
 }
 
-void ofFace::scaleToMap(ofImage * _map) {
-    ofImage map = *_map;
+void ofFace::scaleToMap(ofImage * map) {
+        //    ofImage map = *_map;
         //    int index = (ofClamp(x,0,map.width) + (ofClamp(y,0,map.height) * map.width)) * 3;
-    if(map.width < 1) return;
-    int index = x + (y*map.width);
+    if(&map == NULL) return;
+    if(map->width < 1) return;
+    int index = x + (y*map->width);
+    if (index < 5) return;
         // ofLog() << "Index: " << ofToString(index);
-    if(index < map.getPixelsRef().size()) {
-        int color = map.getPixelsRef()[index];
-        color += map.getPixelsRef()[index+1];
-        color += map.getPixelsRef()[index+2];
+    if(map->getPixelsRef().size() < 5) return;
+
+    if(index < map->getPixelsRef().size()-3) {
+        int color = map->getPixelsRef()[index];
+        color += map->getPixelsRef()[index+1];
+        color += map->getPixelsRef()[index+2];
         //ofLog() << "The color is " << color;
         scale = color / (255*3);
-    } else {
-            
     }
     if(scale == 0) scale = 0.1;
 }

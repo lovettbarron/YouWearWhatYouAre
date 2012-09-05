@@ -99,6 +99,7 @@ void ofCanvas::update() {
         for (int i = 0; i < canvas.size() - 1; i++)
         {
             canvas[i].update();
+            if(&map == NULL) ofLog() << "Null!";
             canvas[i].scaleToMap(&map);
                 //ofLog() << "Scale " << ofToString(canvas[i].scale);
             for (int j = i + 1; j < canvas.size(); j++)
@@ -133,16 +134,16 @@ void ofCanvas::update() {
                         canvas[j].y += AB.y;
                         succeed = true;
                     } else {
-                        canvas[j].x -= AB.x*.2;
-                        canvas[j].y -= AB.y*.2;
+                        canvas[j].x -= AB.x*.4;
+                        canvas[j].y -= AB.y*.4;
                     }
                     if(border.inside(bx,by)) { // && border.inside(bx-r, by-r)
                         canvas[i].x -= AB.x;
                         canvas[i].y -= AB.y;
                         succeed = true;
                     } else {
-                        canvas[i].x += AB.x*.2;
-                        canvas[i].y += AB.y*.2;                        
+                        canvas[i].x += AB.x*.4;
+                        canvas[i].y += AB.y*.4;                        
                     }
                     
                 }
