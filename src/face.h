@@ -7,7 +7,7 @@ class ofFace {
 
 public:
     
-    ofFace(ofImage & _face, ofVec3f _faceLocation, ofVec3f _circleLoc);
+    ofFace(ofImage _face, ofVec3f _faceLocation, ofVec3f _circleLoc, int area);
     ~ofFace();
     
     void update();
@@ -29,7 +29,7 @@ public:
     int resolution;
     void scaleToMap(ofImage * _map);
     
-    float distance(ofVec3f point);
+    float distance(ofVec3f & point);
     
     ofImage theFace;
     ofVec3f cvFaceLocation();
@@ -45,7 +45,7 @@ public:
     float changeThresh;
     
     void updateFace(ofImage _face, ofVec3f _newLocation);
-    bool isWithinRange(ofVec3f _difference);
+    bool isWithinRange(ofVec3f & _difference);
     bool isActive();
 private:
     vector<ofPoint> circle;

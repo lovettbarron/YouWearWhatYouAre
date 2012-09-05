@@ -1,7 +1,7 @@
 #include "ofMain.h"
 #include "face.h"
 
-ofFace::ofFace(ofImage & _face, ofVec3f _faceLocation, ofVec3f _circleLoc)
+ofFace::ofFace(ofImage _face, ofVec3f _faceLocation, ofVec3f _circleLoc, int area)
 {
     theFace = _face;
     faceLocation = _faceLocation;
@@ -10,10 +10,10 @@ ofFace::ofFace(ofImage & _face, ofVec3f _faceLocation, ofVec3f _circleLoc)
     loc = _circleLoc;
         //    x = ofRandom(0,ofGetWidth());
         //    y = ofRandom(0,ofGetHeight());
-    radius = ofRandom(10,ofGetWidth()/10);
+    radius = ofRandom(area*.1,area);
     scale = 1.0;
     bActive = true;
-    resolution = 32;
+    resolution = 24;
     genCircle();
     center = ofVec3f(x,y);
 
@@ -54,11 +54,14 @@ void ofFace::update() {
 }
 
 void ofFace::scaleToMap(ofImage * _map) {
-    int index = (ofClamp(x,0,_map->width) + (ofClamp(y,0,_map->height) * _map->width)) * 3;
-    ofLog() << "Index: " << ofToString(index);
-    int color = _map->getPixelsRef()[index];
-    color += _map->getPixelsRef()[index+1];
-    color += _map->getPixelsRef()[index+2];
+    ofImage map = *_map;
+        //    int index = (ofClamp(x,0,map.width) + (ofClamp(y,0,map.height) * map.width)) * 3;
+    if(map.width < 1) return;
+    int index = x + (y*map.width);
+        // ofLog() << "Index: " << ofToString(index);
+    int color = map.getPixelsRef()[index];
+    color += map.getPixelsRef()[index+1];
+    color += map.getPixelsRef()[index+2];
         //ofLog() << "The color is " << color;
     scale = color / (255*3);
     if(scale == 0) scale = 0.1;
@@ -86,7 +89,7 @@ bool ofFace::isActive() {
     return bActive;
 }
 
-bool ofFace::isWithinRange(ofVec3f _difference) {
+bool ofFace::isWithinRange(ofVec3f & _difference) {
     if(!bActive) return false;
     else if(faceLocation.distance(_difference) < changeThresh) return true;
     else return false;
@@ -161,7 +164,7 @@ void ofFace::genCircle() {
     }  
 }
 
-float ofFace::distance(ofVec3f point) {
+float ofFace::distance(ofVec3f & point) {
     return center.squareDistance(point);
 }
 

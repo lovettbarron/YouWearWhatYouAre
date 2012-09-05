@@ -1,21 +1,23 @@
 #include "ofMain.h"
 #include "canvas.h"
 
-ofCanvas::ofCanvas(ofVec3f * _pos, ofImage * _map, ofPolyline * _border)
+ofCanvas::ofCanvas(ofVec3f _pos, ofImage _map, ofPolyline _border)
 {
     ofLog() << "'Lo, a new canvas is born";
-    std::memcpy(&pos,&_pos,sizeof *pos);
-    std::memcpy(&border,&_border,sizeof *border);
-    std::memcpy(&map,&_map,sizeof *map);
-        //    *pos = *_pos;
-        //    *border = *_border;
-        //    *map = *_map;
-    width = map->width;
-    height = map->height;
+//    std::memcpy(&pos,&_pos,sizeof *pos);
+//    std::memcpy(&border,&_border,sizeof *border);
+//    std::memcpy(&map,&_map,sizeof *map);
+    pos = _pos;
+    border = _border;
+    map = _map;
+    width = map.width;
+    height = map.height;
     cx = width/2;
     cy = height/2;
     padding = 0.1;
     newFaceTimer = 0;
+    debug = false;
+    scale  = 2.0;
     newFaceTimerThresh = 30;
         //frame.allocate(width, height, GL_RGBA);
  }
@@ -29,11 +31,11 @@ ofCanvas::~ofCanvas()
 // second try: http://www.codeproject.com/Articles/42067/2D-Circle-Packing-algorithm-ported-to-C
 
 void ofCanvas::drawBoundingLines() {
-    for(int i=0; i< (int) border->size(); i++ ) {
-        bool repeatNext = i == border->size() - 1;
+    for(int i=0; i< (int) border.size(); i++ ) {
+        bool repeatNext = i == border.size() - 1;
         
-        const ofPoint& cur = border->getVertices()[i];
-        const ofPoint& next = repeatNext ? border->getVertices()[0] : border->getVertices()[i + 1];
+        const ofPoint& cur = border.getVertices()[i];
+        const ofPoint& next = repeatNext ? border.getVertices()[0] : border.getVertices()[i + 1];
         
         float angle = atan2f(next.y - cur.y, next.x - cur.x) * RAD_TO_DEG;
         float distance = cur.distance(next);
@@ -51,8 +53,9 @@ void ofCanvas::drawBoundingLines() {
 }
 
 bool ofCanvas::compare(ofFace* face1, ofFace* face2) {    
-    float d1 = face1->distance(ofVec2f(cx,cy));
-    float d2 = face2->distance(ofVec2f(cx,cy));
+    ofVec3f * center = new ofVec3f(cx,cy,0);
+    float d1 = face1->distance(*center);
+    float d2 = face2->distance(*center);
     if (d1 < d2)
         return 1;
     else if (d1 > d2)
@@ -67,7 +70,7 @@ void ofCanvas::compareWithStillActive( vector<ofFace> * _faces ) {
     //ofLog() << "The primary array is " << ofToString(canvas.size()) << " long";
     for(int i=0;i<canvas.size();i++){
         if( canvas[i].isActive() ) {            
-            for(int j=0;j<faces.size();j++){
+            for(int j=0;j<_faces->size();j++){
                 if(canvas[i].isWithinRange(faces[j].faceLocation)) {
                     //ofLog() << "Updating " << ofToString(i) << " face";
                     canvas[i].updateFace(faces[j].theFace, faces[j].faceLocation);
@@ -96,7 +99,7 @@ void ofCanvas::update() {
         for (int i = 0; i < canvas.size() - 1; i++)
         {
             canvas[i].update();
-            canvas[i].scaleToMap(map);
+            canvas[i].scaleToMap(&map);
                 //ofLog() << "Scale " << ofToString(canvas[i].scale);
             for (int j = i + 1; j < canvas.size(); j++)
             {
@@ -109,7 +112,7 @@ void ofCanvas::update() {
                 float r = canvas[i].getRadius() + canvas[j].getRadius();
                 
                 
-                    // Length squared = (dx * dx) + (dy * dy);
+                // Length squared = (dx * dx) + (dy * dy);
                 float d = distance(canvas[i], canvas[j]);
                 float minSepSq = ofClamp(d, 0, sepSq);
                 d -= minSepSq;
@@ -124,14 +127,18 @@ void ofCanvas::update() {
                     int bx = canvas[i].x - AB.x;
                     int by = canvas[i].y - AB.y;
                     // Checks if the face is within the polyLine
-                    if(border->inside(ax, ay)) { // && border.inside(ax-r, ay-r)
+                    int succeed;
+                    if(border.inside(ax, ay)) { // && border.inside(ax-r, ay-r)
                         canvas[j].x += AB.x;
                         canvas[j].y += AB.y;
+                        succeed = true;
                     }
-                    if(border->inside(bx,by)) { // && border.inside(bx-r, by-r)
+                    if(border.inside(bx,by)) { // && border.inside(bx-r, by-r)
                         canvas[i].x -= AB.x;
                         canvas[i].y -= AB.y;
+                        succeed = true;
                     }
+                    
                 }
                 
             }
@@ -158,18 +165,18 @@ void ofCanvas::update() {
 void ofCanvas::draw(int _x, int _y) {
     ofPushMatrix();
     ofTranslate(0,0);
-    ofScale(.4,.4);
+    ofScale(scale,scale);
+        //    ofScale(.4,.4);
         //    ofEnableAlphaBlending();
         //    frame.draw(0,0);
-    
-    map->draw(0,0);
+    map.reloadTexture();
+    map.draw(0,0);
     for(int i=0;i<canvas.size();i++) {
         canvas[i].draw();
     }
-        // ofSetColor(255,0,0);
-        //border.draw();
-    drawBoundingLines();
-    
+    if(debug) {
+        drawBoundingLines();
+    }
     
         //    ofDisableAlphaBlending();
     ofPopMatrix();
@@ -193,11 +200,11 @@ void ofCanvas::reset() {
 }
 
 void ofCanvas::testImages() {
-    for(int i=0;i<50;i++) {
+    for(int i=0;i<20;i++) {
         ofImage random;
             //random.cropFrom(map,map.width/2,map.height/2,100,100);
         random = canvas[ofRandom(0,canvas.size()-1)].theFace;
-        ofFace newFace = ofFace(random, ofVec3f(pos->x + (width/2), pos->y + (height/2),0),ofVec3f(width/2+ofRandom(-5,5),height/2+ofRandom(-5,5),0));
+        ofFace newFace = ofFace(random, ofVec3f(pos.x + (width/2), pos.y + (height/2),0),ofVec3f(cx+ofRandom(-15,15),cy+ofRandom(-15,15),0), width/2);
         canvas.push_back(newFace);
         
     }

@@ -8,7 +8,7 @@ class ofCanvas {
     
 public:
     
-    ofCanvas(ofVec3f* _pos, ofImage* _map, ofPolyline* _border);
+    ofCanvas(ofVec3f _pos, ofImage _map, ofPolyline _border);
     ~ofCanvas();
     
     void update();
@@ -21,16 +21,18 @@ public:
     bool selected;
     void add(ofFace * face);
     void testImages();
-    ofVec3f * pos;
+    bool debug;
+    ofVec3f pos;
     ofFbo frame;
-    ofImage * map;
-    ofPolyline * border;
+    ofImage map;
+    ofPolyline border;
     void drawBoundingLines();
     ofFace & get(int index);
     int width;
     int height;
     int cx;
     int cy;
+    float scale;
     int size();
     bool bActive;
     long age;

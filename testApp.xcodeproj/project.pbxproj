@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		830DB6E315F3D0080048DB85 /* projectionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 830DB6E215F3D0080048DB85 /* projectionManager.cpp */; };
 		839B3BE3157D247D00D3335A /* Calibration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 839B3B36157D247900D3335A /* Calibration.cpp */; };
 		839B3BE4157D247D00D3335A /* ContourFinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 839B3B37157D247900D3335A /* ContourFinder.cpp */; };
 		839B3BE5157D247D00D3335A /* Distance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 839B3B38157D247900D3335A /* Distance.cpp */; };
@@ -102,8 +101,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		830DB6E215F3D0080048DB85 /* projectionManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = projectionManager.cpp; sourceTree = "<group>"; };
-		830DB6E415F3D0160048DB85 /* projectionManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = projectionManager.h; sourceTree = "<group>"; };
 		839B3B2C157D247900D3335A /* Calibration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Calibration.h; sourceTree = "<group>"; };
 		839B3B2D157D247900D3335A /* ContourFinder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContourFinder.h; sourceTree = "<group>"; };
 		839B3B2E157D247900D3335A /* Distance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Distance.h; sourceTree = "<group>"; };
@@ -579,8 +576,6 @@
 				83ED9B1B15EDC0CF004B584F /* face.cpp */,
 				83ED9B1D15EDD544004B584F /* canvas.h */,
 				83ED9B1E15EDD561004B584F /* canvas.cpp */,
-				830DB6E415F3D0160048DB85 /* projectionManager.h */,
-				830DB6E215F3D0080048DB85 /* projectionManager.cpp */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -723,7 +718,6 @@
 				83ED9B0E15ECFFFF004B584F /* File.cpp in Sources */,
 				83ED9B1C15EDC0CF004B584F /* face.cpp in Sources */,
 				83ED9B1F15EDD561004B584F /* canvas.cpp in Sources */,
-				830DB6E315F3D0080048DB85 /* projectionManager.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
