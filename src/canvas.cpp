@@ -132,11 +132,17 @@ void ofCanvas::update() {
                         canvas[j].x += AB.x;
                         canvas[j].y += AB.y;
                         succeed = true;
+                    } else {
+                        canvas[j].x -= AB.x*.2;
+                        canvas[j].y -= AB.y*.2;
                     }
                     if(border.inside(bx,by)) { // && border.inside(bx-r, by-r)
                         canvas[i].x -= AB.x;
                         canvas[i].y -= AB.y;
                         succeed = true;
+                    } else {
+                        canvas[i].x += AB.x*.2;
+                        canvas[i].y += AB.y*.2;                        
                     }
                     
                 }
@@ -169,8 +175,10 @@ void ofCanvas::draw(int _x, int _y) {
         //    ofScale(.4,.4);
         //    ofEnableAlphaBlending();
         //    frame.draw(0,0);
-    map.reloadTexture();
-    map.draw(0,0);
+    if(debug) {
+        map.reloadTexture();
+        map.draw(0,0);
+    }
     for(int i=0;i<canvas.size();i++) {
         canvas[i].draw();
     }

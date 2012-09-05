@@ -32,8 +32,9 @@ public:
     ofImage * mapCopy;
     ofPolyline * poly;
     
-    
-    
+    cv::Mat prevCVFrame;
+    cv::Mat curCVFrame;
+    ofVec3f velocity;
     void setupType();
     void reset();
     void updateCamera();

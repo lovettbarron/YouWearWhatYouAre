@@ -59,11 +59,15 @@ void ofFace::scaleToMap(ofImage * _map) {
     if(map.width < 1) return;
     int index = x + (y*map.width);
         // ofLog() << "Index: " << ofToString(index);
-    int color = map.getPixelsRef()[index];
-    color += map.getPixelsRef()[index+1];
-    color += map.getPixelsRef()[index+2];
+    if(index < map.getPixelsRef().size()) {
+        int color = map.getPixelsRef()[index];
+        color += map.getPixelsRef()[index+1];
+        color += map.getPixelsRef()[index+2];
         //ofLog() << "The color is " << color;
-    scale = color / (255*3);
+        scale = color / (255*3);
+    } else {
+            
+    }
     if(scale == 0) scale = 0.1;
 }
 

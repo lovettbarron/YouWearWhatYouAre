@@ -37,6 +37,7 @@ void testApp::setup() {
     classifier.load(ofToDataPath("haarcascade_frontalface_alt2.xml"));
     graySmall.allocate(cam.getWidth() * scaleFactor, cam.getHeight() * scaleFactor, OF_IMAGE_GRAYSCALE);
     debug = false;
+        //    velocity = ofVec3F(1.1,1.1,0);
     
     // Make first canvas
     ofImage jacket;
@@ -91,6 +92,17 @@ ofPolyline testApp::getContour(ofImage * map) {
 void testApp::update() {
     updateCamera();
     
+        // convertColor(graySmall, curCVFrame,CV_8UC1);
+    // Use Lucas Kanade method to track faces across time
+    int width = cam.getWidth() * scaleFactor;
+    int height = cam.getHeight() * scaleFactor;
+//    cv::Mat velX = cvCreateImage( cvSize( width ,height ), IPL_DEPTH_32F, 1  );
+//    cv::Mat velY = cvCreateImage( cvSize( width ,height ), IPL_DEPTH_32F, 1  );
+    
+/*    buildOpticalFlowPyramid(graySmall)
+     calcOpticalFlowPyrLK(prevCVFrame,graySmall,cam.getWidth() * scaleFactor, (CvArr)velX, (CvArr)velY);
+    prevCVFrame = curCVFrame.clone(); */
+    
     for(int i=0; i < objects.size(); i++) {   
         cv::Rect obj = objects[i];
         filterFace(&obj);
@@ -137,7 +149,9 @@ void testApp::delegateToCanvas(ofImage _face, int x, int y, int w, int h) {
 
 void testApp::draw() {
         //    ofLog() << "Size of array" << ofToString(canvases.size());
+    
     ofPushMatrix();
+    ofScale(panel.getValueF("scaleWindow"),panel.getValueF("scaleWindow"));
     for(int i=0; i<canvases.size(); i++) {
         if(i!=0) ofTranslate(canvases[i-1]->width*2);
         canvases[i]->draw();
@@ -272,7 +286,7 @@ void testApp::updateConditional() {
         graySmall.allocate(cam.getWidth() * panel.getValueF("faceScale"), cam.getHeight() * panel.getValueF("faceScale"), OF_IMAGE_GRAYSCALE);
     }
     
-        //scaleFactor = manager->scaleFactor = panel.getValueF("faceScale");
+    scaleFactor = panel.getValueF("faceScale");
     
     if(panel.getValueB("debug")) setDebug(true);
     else setDebug(false);
@@ -282,7 +296,7 @@ void testApp::updateConditional() {
         panel.setValueB("resetFaces",false);
     }
     if(panel.getValueB("add100Faces")) {
-        for(int i=0;i<numberOfCanvases();i++) {
+        for(int i=0;i<canvases.size();i++) {
             canvases[i]->testImages();
         }
          
@@ -311,6 +325,10 @@ void testApp::setupPanel() {
     panelWidth = 200;
     panel.setup(panelWidth, 800);
     panel.addPanel("Tracking Bits");
+    panel.addLabel("Main Window");
+    panel.addSlider("scaleWindow", 1.0, 0.05, 2.0, false);
+    panel.addSlider("scaleTop", 1.0, 0.05, 1.0, false);
+    panel.addSlider("scaleBottom", 1.0, 0.05, 1.0, false);
     panel.addLabel("Image Processing");
     panel.addSlider("faceScale", .2, 0.05, 1.0, false);
     panel.addSlider("minAreaRadius", 7, 0, 640, true);
