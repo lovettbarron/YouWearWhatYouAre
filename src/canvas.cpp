@@ -18,6 +18,7 @@ ofCanvas::ofCanvas(ofVec3f _pos, ofImage _map, ofPolyline _border)
     newFaceTimer = 0;
     debug = false;
     scale  = 2.0;
+    limit = 50;
     newFaceTimerThresh = 30;
         //frame.allocate(width, height, GL_RGBA);
  }
@@ -38,7 +39,7 @@ void ofCanvas::drawBoundingLines() {
         const ofPoint& next = repeatNext ? border.getVertices()[0] : border.getVertices()[i + 1];
         
         float angle = atan2f(next.y - cur.y, next.x - cur.x) * RAD_TO_DEG;
-        float distance = cur.distance(next);
+        float distance = cur.squareDistance(next);
         
         if(repeatNext) {
             ofSetColor(255, 0, 255);
@@ -79,14 +80,33 @@ bool ofCanvas::compareWithStillActive( ofImage * _img, ofVec3f * _loc) {
 
 
 void ofCanvas::update() {
- 
+    checkSize();
         // std::sort(canvas.begin(), canvas.end(), &compare);
     newFaceTimer--;
+    int offsetx=0;
+    int offsety=0;
+    int maxHeight=0;
+    for(int i=0;i<canvas.size();i++) {
+        canvas[i].debug = debug;
+        canvas[i].update();
+        canvas[i].x = offsetx;
+        canvas[i].y = offsety;
+        canvas[i].scaleToMap(&map);
+        offsetx += canvas[i].radius*2;
+        if(maxHeight<canvas[i].radius*2) maxHeight = canvas[i].radius*2;
+        if(offsetx>width) {
+            offsetx=0;
+            offsety+=maxHeight;
+            maxHeight=0;
+        }
+    }
     
+    /*
     if(canvas.size() != 0) {
         float sepSq = .4 * .4;
         for (int i = 0; i < canvas.size() - 1; i++)
         {
+            canvas[i].debug = debug;
             canvas[i].update();
             if(&map == NULL) ofLog() << "Null!";
             canvas[i].scaleToMap(&map);
@@ -106,7 +126,8 @@ void ofCanvas::update() {
                 float d = distance(canvas[i], canvas[j]);
                 float minSepSq = ofClamp(d, 0, sepSq);
                 d -= minSepSq;
-                
+                bool succeed;
+                float forceFromCenter = (canvas[i].distance(*new ofVec3f(cx,cy,0)) / (width/2));
                 if (d < (r * r) - 0.01 )
                 {
                     AB.normalize();
@@ -117,29 +138,30 @@ void ofCanvas::update() {
                     int bx = canvas[i].x - AB.x;
                     int by = canvas[i].y - AB.y;
                     // Checks if the face is within the polyLine
-                    int succeed;
                     if(border.inside(ax, ay)) { // && border.inside(ax-r, ay-r)
                         canvas[j].x += AB.x;
                         canvas[j].y += AB.y;
                         succeed = true;
                     } else {
-                        canvas[j].x -= AB.x*.4;
-                        canvas[j].y -= AB.y*.4;
+                        canvas[j].x -= AB.x*forceFromCenter;
+                        canvas[j].y -= AB.y*forceFromCenter;
+                        succeed = false;
                     }
                     if(border.inside(bx,by)) { // && border.inside(bx-r, by-r)
                         canvas[i].x -= AB.x;
                         canvas[i].y -= AB.y;
                         succeed = true;
                     } else {
-                        canvas[i].x += AB.x*.4;
-                        canvas[i].y += AB.y*.4;                        
+                        canvas[i].x += AB.x*forceFromCenter;
+                        canvas[i].y += AB.y*forceFromCenter;
+                        succeed = false;
                     }
                     
                 }
-                
+                // This pulls these guys closer to the center
             }
          }
-    }
+    }*/
     
     // Draw to FBO
 //    frame.begin();
@@ -200,7 +222,6 @@ void ofCanvas::reset() {
 void ofCanvas::testImages() {
     for(int i=0;i<20;i++) {
         ofImage random;
-            //random.cropFrom(map,map.width/2,map.height/2,100,100);
         random = canvas[ofRandom(0,canvas.size()-1)].theFace;
         ofFace newFace = ofFace(random, ofVec3f(pos.x + (width/2), pos.y + (height/2),0),ofVec3f(cx+ofRandom(-15,15),cy+ofRandom(-15,15),0), width/2);
         canvas.push_back(newFace);
@@ -210,6 +231,12 @@ void ofCanvas::testImages() {
 
 int ofCanvas::size() {
     return canvas.size();
+}
+
+void ofCanvas::checkSize() {
+    if(canvas.size()>limit) {
+        canvas.erase(canvas.begin());
+    }
 }
 
 ofFace & ofCanvas::get( int index ) {

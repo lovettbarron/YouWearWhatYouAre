@@ -16,7 +16,7 @@ ofFace::ofFace(ofImage _face, ofVec3f _faceLocation, ofVec3f _circleLoc, int are
     resolution = 24;
     genCircle();
     center = ofVec3f(x,y);
-
+    debug = false;
     age = 0;
     tween = 0.0f;
     tweenStep = 0.01;
@@ -54,8 +54,13 @@ void ofFace::update() {
 }
 
 void ofFace::scaleToMap(ofImage * map) {
-        //    ofImage map = *_map;
-        //    int index = (ofClamp(x,0,map.width) + (ofClamp(y,0,map.height) * map.width)) * 3;
+    // Should be full sized to help users spot their own face, which will
+    // help in connecting them to the piece.
+    if(bActive) { 
+        scale = 1.0;
+        return;
+    }
+    
     if(&map == NULL) return;
     if(map->width < 1) return;
     int index = x + (y*map->width);
@@ -63,12 +68,12 @@ void ofFace::scaleToMap(ofImage * map) {
         // ofLog() << "Index: " << ofToString(index);
     if(map->getPixelsRef().size() < 5) return;
 
-    if(index < map->getPixelsRef().size()-3) {
+    if(index < map->getPixelsRef().size()) {
         int color = map->getPixelsRef()[index];
-        color += map->getPixelsRef()[index+1];
-        color += map->getPixelsRef()[index+2];
+            //        color += map->getPixelsRef()[index+1];
+            //        color += map->getPixelsRef()[index+2];
         //ofLog() << "The color is " << color;
-        scale = color / (255*3);
+        scale = color / (255);
     }
     if(scale == 0) scale = 0.1;
 }
@@ -97,7 +102,7 @@ bool ofFace::isActive() {
 
 bool ofFace::isWithinRange(ofVec3f & _difference) {
     if(!bActive) return false;
-    else if(faceLocation.distance(_difference) < changeThresh) return true;
+    else if(faceLocation.squareDistance(_difference) < changeThresh) return true;
     else return false;
 }
 
@@ -130,21 +135,21 @@ void ofFace::draw(int _x, int _y) {
     glPopMatrix();
     
     glDisable(GL_DEPTH_TEST);
-/*
-    ofPushMatrix();
-    ofTranslate(_x,_y,0.0f);
-        string stats;
-        stats = "age: " + ofToString(age);
-        ofDrawBitmapString(stats,0, 0);
-        stats = "radius: " + ofToString(radius);
-        ofDrawBitmapString(stats,0, 0);
-        stats = "scale: " + ofToString(scale);
-        ofDrawBitmapString(stats,0, 0);
-        stats = "age: " + ofToString(age);
-        ofDrawBitmapString(stats,0, 0);
-        stats = "x: " + ofToString(loc.x) + " y: " + ofToString(loc.y);
-        ofDrawBitmapString(stats,0, 0);
-    ofPopMatrix();*/
+    if(debug) {
+        ofPushMatrix();
+        ofTranslate(_x,_y,0.0f);
+        ofScale(0.6,0.6);
+            string stats;
+            stats = "age: " + ofToString(age);
+            ofDrawBitmapString(stats,0, 0);
+            stats = "radius: " + ofToString(radius);
+            ofDrawBitmapString(stats,0, 12);
+            stats = "scale: " + ofToString(scale);
+            ofDrawBitmapString(stats,0, 24);
+            stats = "x: " + ofToString(loc.x) + " y: " + ofToString(loc.y);
+            ofDrawBitmapString(stats,0, 36);
+        ofPopMatrix();
+    }
 }
 
 void ofFace::draw() {

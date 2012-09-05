@@ -8,11 +8,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "src/canvas.cpp"
-         timestampString = "368499099.626225"
+         timestampString = "368563860.10435"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "37"
-         endingLineNumber = "37"
+         startingLineNumber = "38"
+         endingLineNumber = "38"
          landmarkName = "ofCanvas::drawBoundingLines()"
          landmarkType = "5">
       </FileBreakpoint>
@@ -21,12 +21,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "src/testApp.cpp"
-         timestampString = "368553472.927995"
+         timestampString = "368560853.715694"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "132"
-         endingLineNumber = "132"
-         landmarkName = "testApp::filterFace(cv::Rect * objects)"
+         startingLineNumber = "414"
+         endingLineNumber = "414"
+         landmarkName = "testApp::updateCamera()"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

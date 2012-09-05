@@ -22,6 +22,8 @@ public:
     void add(ofFace * face);
     void testImages();
     bool debug;
+    void checkSize();
+    int limit;
     ofVec3f pos;
     ofFbo frame;
     ofImage map;

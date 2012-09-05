@@ -37,6 +37,7 @@ void testApp::setup() {
     classifier.load(ofToDataPath("haarcascade_frontalface_alt2.xml"));
     graySmall.allocate(cam.getWidth() * scaleFactor, cam.getHeight() * scaleFactor, OF_IMAGE_GRAYSCALE);
     debug = false;
+    smoothingCounter = 3;
         //    velocity = ofVec3F(1.1,1.1,0);
     
     // Make first canvas
@@ -93,14 +94,16 @@ void testApp::update() {
     updateConditional();
     updateCamera();
     
-        // convertColor(graySmall, curCVFrame,CV_8UC1);
-    // Use Lucas Kanade method to track faces across time
+    // Using Lucas Kanade method to track faces across time
+    // would be ideal for this application, maybe later?
+    
+    /*convertColor(graySmall, curCVFrame,CV_8UC1);
     int width = cam.getWidth() * scaleFactor;
     int height = cam.getHeight() * scaleFactor;
-//    cv::Mat velX = cvCreateImage( cvSize( width ,height ), IPL_DEPTH_32F, 1  );
-//    cv::Mat velY = cvCreateImage( cvSize( width ,height ), IPL_DEPTH_32F, 1  );
+    cv::Mat velX = cvCreateImage( cvSize( width ,height ), IPL_DEPTH_32F, 1  );
+    cv::Mat velY = cvCreateImage( cvSize( width ,height ), IPL_DEPTH_32F, 1  );
     
-/*    buildOpticalFlowPyramid(graySmall)
+    buildOpticalFlowPyramid(graySmall)
      calcOpticalFlowPyrLK(prevCVFrame,graySmall,cam.getWidth() * scaleFactor, (CvArr)velX, (CvArr)velY);
     prevCVFrame = curCVFrame.clone(); */
     
@@ -125,11 +128,13 @@ void testApp::filterFace(cv::Rect * objects) {
     newFace.cropFrom(newFrame, x, y, w, h );
     newFace.reloadTexture();
     ofVec3f _loc = ofVec3f(x+w/2, y+h/2,0);
-    bool isNew = false;
+    bool isNew = true;
     for(int i=0;i<canvases.size();i++) {
-        isNew = canvases[i]->compareWithStillActive( &newFace, &_loc );
+        // Don't run if false, because a face can only be "new" once
+        if(isNew != false)
+            isNew = canvases[i]->compareWithStillActive( &newFrame, &_loc );
     }
-    if(isNew) {;
+    if(isNew) {
         delegateToCanvas(newFace,x,y,w,h);
     }
 }
@@ -393,7 +398,43 @@ void testApp::updateCamera() {
         }
         graySmall.update();
         
-        classifier.detectMultiScale(graySmallMat, objects, panel.getValueF("scaleFactor"), panel.getValueI("minNeighbors"), 0, cv::Size(panel.getValueI("minSize"),panel.getValueI("minSize")), cv::Size(panel.getValueI("maxSize"),panel.getValueI("maxSize")));
+        classifier.detectMultiScale(graySmallMat, unfilteredObjects, panel.getValueF("scaleFactor"), panel.getValueI("minNeighbors"), 0, cv::Size(panel.getValueI("minSize"),panel.getValueI("minSize")), cv::Size(panel.getValueI("maxSize"),panel.getValueI("maxSize")));
+        
+        
+        // Smoothing detected face rectangles across three frames
+        objectSmoothingThresh = 3;
+        if(smoothingCounter>0) {
+            for(int i=0;i<unfilteredObjects.size();i++) {
+                cv::Rect & obj = unfilteredObjects[i];
+                ofVec3f * c1 = new ofVec3f(obj.x + obj.width/2, obj.y + obj.height/2,0);
+                for(int j=0;j<smoothedObjects.size();j++) {
+                    cv::Rect & comobj = smoothedObjects[j];
+                    ofVec3f * c2 = new ofVec3f(comobj.x + comobj.width/2, comobj.y + comobj.height/2,0);
+
+                    if(c1->squareDistance(*c2)<objectSmoothingThresh) {
+                        //Averages the two assumed equal faces
+                        //  smoothedObjects[j].x = (smoothedObjects[j].x + unfilteredObjects[j].x) / 2;
+                            // smoothedObjects[j].y = (smoothedObjects[j].y + unfilteredObjects[j].y) / 2;
+                            // smoothedObjects[j].width = (smoothedObjects[j].width + unfilteredObjects[j].width) / 2;
+                            //smoothedObjects[j].height = (smoothedObjects[j].height + unfilteredObjects[j].height) / 2;
+                        
+                    } else {
+                        // Assumes a new face and pushes it to the smoothed queue
+                        smoothedObjects.push_back(unfilteredObjects[i]);
+                    }
+                }
+                if(smoothedObjects.size() == 0)
+                    smoothedObjects.push_back(unfilteredObjects[i]);
+            }
+                
+            
+            smoothingCounter -= 1;
+        } else {
+            smoothingCounter = 3;
+            objects = smoothedObjects;
+            smoothedObjects.clear();
+        }
+        
         newFrame.setFromPixels(cam.getPixels(), cam.width, cam.height, OF_IMAGE_COLOR);
         
     }

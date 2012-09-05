@@ -90,6 +90,10 @@ public:
     ofImage gray, graySmall;
     cv::CascadeClassifier classifier;
     vector<cv::Rect> objects;
+    vector<cv::Rect> unfilteredObjects;
+    vector<cv::Rect> smoothedObjects;
+    int smoothingCounter;
+    float objectSmoothingThresh;
     float scaleFactor;
     
     

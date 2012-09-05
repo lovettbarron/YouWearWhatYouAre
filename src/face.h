@@ -15,7 +15,7 @@ public:
     void draw();
     void reset();
     void remove();
-    
+    bool debug;
     int x;
     int y;
     float scale;
