@@ -121,10 +121,17 @@ void testApp::filterFace(cv::Rect * objects) {
     int w = objects->width * (1 / scaleFactor);
     int h = objects->height * (1 / scaleFactor);
     
+    // Check to see if it's a previous face location
     newFace.cropFrom(newFrame, x, y, w, h );
     newFace.reloadTexture();
-    
-    delegateToCanvas(newFace,x,y,w,h);
+    ofVec3f _loc = ofVec3f(x+w/2, y+h/2,0);
+    bool isNew = false;
+    for(int i=0;i<canvases.size();i++) {
+        isNew = canvases[i]->compareWithStillActive( &newFace, &_loc );
+    }
+    if(isNew) {;
+        delegateToCanvas(newFace,x,y,w,h);
+    }
 }
 
 void testApp::delegateToCanvas(ofImage _face, int x, int y, int w, int h) {
@@ -135,12 +142,11 @@ void testApp::delegateToCanvas(ofImage _face, int x, int y, int w, int h) {
         }
     }
     if(canvases.size()>0) {
-            // The new face
+
+        // Create the new face from the passed image
         ofFace theFace = ofFace(_face, ofVec3f(x + (w/2), y + (h/2),0),ofVec3f(canvases[index]->cx+ofRandom(-5,5),canvases[index]->cy+ofRandom(-5,5),0),canvases[index]->width/2);
-        // This creates a pointer to faces stored in canvases
-        vector<ofFace>* faces = &canvases[index]->canvas; 
-        faces->push_back( theFace );
-            //        canvases[index].compareWithStillActive( &faces )
+        
+        canvases[index]->canvas.push_back( theFace );
     }
 }
 

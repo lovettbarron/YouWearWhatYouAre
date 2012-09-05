@@ -42,7 +42,7 @@ public:
     vector<ofFace> canvas;
     
     float sizeOnMap(ofFace * _face);
-    void compareWithStillActive( vector<ofFace> * _faces);
+    bool compareWithStillActive( ofImage * _img, ofVec3f * _loc);
     
 private:
     void pack();

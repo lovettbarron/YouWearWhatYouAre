@@ -63,29 +63,18 @@ bool ofCanvas::compare(ofFace* face1, ofFace* face2) {
     else return 0;
 }
 
-void ofCanvas::compareWithStillActive( vector<ofFace> * _faces ) {
-    //ofLog() << "Starting compare";
-    vector<ofFace> faces = *_faces;
-    //ofLog() << "The compare array is " << ofToString(faces.size()) << " long";
-    //ofLog() << "The primary array is " << ofToString(canvas.size()) << " long";
+bool ofCanvas::compareWithStillActive( ofImage * _img, ofVec3f * _loc) {
     for(int i=0;i<canvas.size();i++){
         if( canvas[i].isActive() ) {            
-            for(int j=0;j<_faces->size();j++){
-                if(canvas[i].isWithinRange(faces[j].faceLocation)) {
-                    //ofLog() << "Updating " << ofToString(i) << " face";
-                    canvas[i].updateFace(faces[j].theFace, faces[j].faceLocation);
-                    faces[j].remove();
+                if(canvas[i].isWithinRange(*_loc)) {
+                    canvas[i].updateFace(*_img, *_loc);
+                    return false; // A face was found and updated
                 } else {
-                    //ofLog() << "Adding a new face at" << ofToString(canvas.size());
-                    if(newFaceTimer <= 0) {
-                    canvas.push_back(faces[j]);
-                    newFaceTimer = newFaceTimerThresh;
+                    return true; // No face was found on this canvas.
                     }
                 }
-            }
-        }
     }
-    if(canvas.size() == 0) canvas.push_back(faces[0]);
+    return true; // Default to adding face
 }
 
 
