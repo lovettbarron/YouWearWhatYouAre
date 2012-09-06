@@ -31,7 +31,7 @@ public:
     ofImage * map;
     ofImage * mapCopy;
     ofPolyline * poly;
-    
+    ofxCv::RunningBackground background;
     cv::Mat prevCVFrame;
     cv::Mat curCVFrame;
     ofVec3f velocity;
@@ -76,7 +76,6 @@ public:
     void setupPanel();
     ofxAutoControlPanel panel;
     ofImage thresh;
-    ofImage bgThresh;
     
     int panelWidth;
     bool debug;

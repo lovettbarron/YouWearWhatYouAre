@@ -12,7 +12,7 @@ ofFace::ofFace(ofImage _face, ofVec3f _faceLocation, ofVec3f _circleLoc, int _ar
     
         //    x = ofRandom(0,ofGetWidth());
         //    y = ofRandom(0,ofGetHeight());
-    radius = ofRandom(area*.1,area*.5);
+    radius = ofRandom(area*.1,area);
     scale = 1.0;
     bActive = true;
     resolution = 24;
@@ -22,7 +22,7 @@ ofFace::ofFace(ofImage _face, ofVec3f _faceLocation, ofVec3f _circleLoc, int _ar
     age = 0;
     tween = 0.0f;
     tweenStep = 0.01;
-
+    selected = false;
     inactiveTimer = 0;
     inactiveTimerStep = 0.05f;
     changeThresh = 15;
@@ -65,21 +65,25 @@ void ofFace::scaleToMap(ofImage * map) {
         scale = 1.0;
         return;
     }
-    
-    if(&map == NULL) return;
-    if(map->width < 1) return;
-    int index = x + (y*map->width);
-    if (index < 5) return;
-        // ofLog() << "Index: " << ofToString(index);
-    if(map->getPixelsRef().size() < 5) return;
-
-    if(index < map->getPixelsRef().size()) {
-        int color = map->getPixelsRef()[index*3];
-        scale = color / (255);
-    }
-    if(scale == 0) scale = 0.1;
+        //    scale = ofClamp(-(center.distanceSquared(loc) / center.x)-1, 0, 1.0);
+//    if(&map == NULL) return;
+//    if(map->width < 1) return;
+//    int index = x + (y*map->width);
+//    if (index < 5) return;
+//        // ofLog() << "Index: " << ofToString(index);
+//    if(map->getPixelsRef().size() < 5) return;
+//
+//    if(index < map->getPixelsRef().size()) {
+//        int color = map->getPixelsRef()[index*3];
+//        scale = color / (255);
+//    }
+//    if(scale == 0) scale = 0.1;
         //    scale = loc.squareDistance(spawnPoint);
         //    ofLog() << "scale: " << ofToString(scale);
+}
+
+void ofFace::scaleToCount(int _count) {
+    scale = 1.0;
 }
 
 float ofFace::getRadius() {
@@ -140,6 +144,7 @@ void ofFace::draw(int _x, int _y) {
     
     glDisable(GL_DEPTH_TEST);
     if(debug) {
+        if(selected) {
         ofPushMatrix();
         ofTranslate(_x,_y,0.0f);
         ofScale(0.6,0.6);
@@ -153,6 +158,7 @@ void ofFace::draw(int _x, int _y) {
             stats = "x: " + ofToString(loc.x) + " y: " + ofToString(loc.y);
             ofDrawBitmapString(stats,0, 36);
         ofPopMatrix();
+        }
     }
 }
 

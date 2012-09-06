@@ -9,8 +9,10 @@ class ofCanvas {
     
 public:
     
-    ofCanvas(ofVec3f _pos, ofImage _map, ofPolyline _border);
+    ofCanvas(ofBaseApp * base,ofVec3f _pos, ofImage _map, ofPolyline _border);
     ~ofCanvas();
+    
+    ofBaseApp * app;
     
     void update();
     void draw(int _x, int _y);
@@ -25,6 +27,7 @@ public:
     bool debug;
     void checkSize();
     int limit;
+    ofVec3f mouse;
     ofVec3f pos;
     ofFbo frame;
     ofImage map;

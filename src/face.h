@@ -21,6 +21,7 @@ public:
     void reset();
     void remove();
     bool debug;
+    bool selected;
     int x;
     int y;
     float scale;
@@ -34,7 +35,7 @@ public:
     long age;
     int resolution;
     void scaleToMap(ofImage * _map);
-    
+    void scaleToCount(int _count);
     float distance(ofVec3f & point);
     
     ofImage theFace;

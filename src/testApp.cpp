@@ -36,6 +36,11 @@ void testApp::setup() {
     graySmall.allocate(cam.getWidth() * scaleFactor, cam.getHeight() * scaleFactor, OF_IMAGE_GRAYSCALE);
     debug = false;
     smoothingCounter = 3;
+
+    background.setLearningTime(900);
+    background.setThresholdValue(10);
+
+    
         //    velocity = ofVec3F(1.1,1.1,0);
     
     // Make first canvas
@@ -56,7 +61,7 @@ void testApp::setup() {
  *******************************************/
     // Add a canvas to the vector from image and position.
 void testApp::add(ofVec3f _pos, ofImage _map) {
-    canvases.push_back( new ofCanvas( ofVec3f(0,0,0), _map, getContour(&_map)) );
+    canvases.push_back( new ofCanvas( this, ofVec3f(0,0,0), _map, getContour(&_map)) );
     ofLog() << "Canvases added, size " << ofToString(canvases.size());
 }
 
@@ -145,9 +150,12 @@ void testApp::delegateToCanvas(ofImage _face, int x, int y, int w, int h) {
         }
     }
     if(canvases.size()>0) {
-
         // Create the new face from the passed image
-        ofFace theFace = ofFace(_face, ofVec3f(x + (w/2), y + (h/2),0),ofVec3f(canvases[index]->cx+ofRandom(-5,5),canvases[index]->cy+ofRandom(-5,5),0),canvases[index]->width/2);
+        ofFace theFace = ofFace(_face
+                                , ofVec3f(x + (w/2), y + (h/2),0)
+                                ,ofVec3f(canvases[index]->cx+ofRandom(-5,5)
+                                ,canvases[index]->cy+ofRandom(-5,5),0)
+                                ,20);
         
         canvases[index]->canvas.push_back( theFace );
     }
@@ -158,8 +166,24 @@ void testApp::delegateToCanvas(ofImage _face, int x, int y, int w, int h) {
  *******************************************/
 
 void testApp::draw() {
-        //    ofLog() << "Size of array" << ofToString(canvases.size());
     
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.5);
+    if(debug) {
+        ofPushMatrix();
+        ofNoFill();
+        ofTranslate(ofGetWidth()-cam.width,0);
+        cam.draw(0,0);
+        thresh.draw(0,cam.height);
+        ofScale(1 / scaleFactor, 1 / scaleFactor);
+        for(int i = 0; i < objects.size(); i++) {
+            ofLog() << "Drawing face #" << ofToString(i);
+            ofRect(toOf(objects[i]));
+        }
+        ofPopMatrix();
+    }
+
     ofPushMatrix();
     ofScale(panel.getValueF("scaleWindow"),panel.getValueF("scaleWindow"));
     for(int i=0; i<canvases.size(); i++) {
@@ -169,19 +193,7 @@ void testApp::draw() {
     }
     ofPopMatrix();
     
-    if(debug) {
-    ofPushMatrix();
-        ofTranslate(ofGetWidth()-cam.width,ofGetWidth()-cam.width);
-        cam.draw(0,0);
-        ofScale(1 / scaleFactor, 1 / scaleFactor);
-        for(int i = 0; i < objects.size(); i++) {
-            ofLog() << "Drawing face #" << ofToString(i);
-            ofRect(toOf(objects[i]));
-        }
-    ofPopMatrix();
-        
-    }
-    
+       
     GLboolean isDepthTesting;
     glGetBooleanv(GL_DEPTH_TEST, &isDepthTesting);
     if(isDepthTesting == GL_TRUE)
@@ -252,7 +264,7 @@ void testApp::mouseReleased(int x, int y, int button) {
 
 void testApp::keyPressed(int key) {
     if(key == ' ') {
-        saveMatrix = true;
+        background.reset();
     }
 }
 
@@ -344,26 +356,24 @@ void testApp::setupPanel() {
         //Setup panel
     panelWidth = 200;
     panel.setup(panelWidth, 800);
+    
     panel.addPanel("Tracking Bits");
+    panel.addLabel("Debug switches");
+    panel.addToggle("add100Faces", false);
+    panel.addToggle("debug",false);
+    
     panel.addLabel("Main Window");
     panel.addSlider("scaleWindow", 1.0, 0.05, 2.0, false);
     panel.addSlider("scaleTop", 1.0, 0.05, 1.0, false);
     panel.addSlider("scaleBottom", 1.0, 0.05, 1.0, false);
     panel.addLabel("Image Processing");
     panel.addSlider("faceScale", .2, 0.05, 1.0, false);
-    panel.addSlider("minAreaRadius", 7, 0, 640, true);
-    panel.addSlider("maxAreaRadius", 100, 0, 640, true);
     
     panel.addLabel("DetectMultiScale tweak");
     panel.addSlider("scaleFactor",1.06, 1.01,2.0,false);
     panel.addSlider("minNeighbors",1, 1, 5,true);
     panel.addSlider("minSize",0, 1, 400,true);
     panel.addSlider("maxSize",100, 1, 400,true);
-    
-    panel.addLabel("Debug switches");
-    panel.addToggle("resetFaces", false);
-    panel.addToggle("add100Faces", false);
-    panel.addToggle("debug",false);
     
     panel.addPanel("Global Tweaks");
     panel.addSlider("circleResolution", 64, 4, 128, true);
@@ -387,16 +397,27 @@ void testApp::setupType() {
 void testApp::updateCamera() {
     cam.update();
     if(cam.isFrameNew()) {
+        background.update(cam, thresh);
+        thresh.update();
         
-        convertColor(cam, gray, CV_RGB2GRAY);
-        resize(gray, graySmall);
+            //        convertColor(thresh, gray, CV_GRA //CV_RGB2GRAY);
+        resize(thresh, graySmall);
         Mat graySmallMat = toCv(graySmall);
         if(ofGetMousePressed()) {
             equalizeHist(graySmallMat, graySmallMat);
         }
         graySmall.update();
         
-        classifier.detectMultiScale(graySmallMat, unfilteredObjects, panel.getValueF("scaleFactor"), panel.getValueI("minNeighbors"), 0, cv::Size(panel.getValueI("minSize"),panel.getValueI("minSize")), cv::Size(panel.getValueI("maxSize"),panel.getValueI("maxSize")));
+        classifier.detectMultiScale(
+                                    graySmallMat
+                                    , unfilteredObjects
+                                    , panel.getValueF("scaleFactor")
+                                    , panel.getValueI("minNeighbors")
+                                    , 0
+                                    , cv::Size(panel.getValueI("minSize")
+                                               , panel.getValueI("minSize"))
+                                    , cv::Size(panel.getValueI("maxSize")
+                                               ,panel.getValueI("maxSize")));
         
         
         // Smoothing detected face rectangles across three frames
@@ -440,6 +461,7 @@ void testApp::updateCamera() {
 }
 
 void testApp::setDebug(bool _debug) {
+    debug = _debug;
     for(int i=0;i<canvases.size();i++) {
         canvases[i]->debug = _debug;
     }
