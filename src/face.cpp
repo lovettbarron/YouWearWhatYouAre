@@ -1,16 +1,18 @@
 #include "ofMain.h"
 #include "face.h"
 
-ofFace::ofFace(ofImage _face, ofVec3f _faceLocation, ofVec3f _circleLoc, int area)
+ofFace::ofFace(ofImage _face, ofVec3f _faceLocation, ofVec3f _circleLoc, int _area)
 {
     theFace = _face;
     faceLocation = _faceLocation;
     x = _circleLoc.x;
     y = _circleLoc.y;
     loc = _circleLoc;
+    area = _area;
+    
         //    x = ofRandom(0,ofGetWidth());
         //    y = ofRandom(0,ofGetHeight());
-    radius = ofRandom(area*.1,area);
+    radius = ofRandom(area*.1,area*.5);
     scale = 1.0;
     bActive = true;
     resolution = 24;
@@ -32,7 +34,10 @@ ofFace::~ofFace()
 }
 
 void ofFace::update() {
-    loc = ofVec3f(x,y,0);
+    x = loc.x;
+    y = loc.y;
+    //loc = ofVec3f(x,y,0);
+    distanceFromCenter = distance(loc);
     if(circle.size() <= 1) {
         genCircle();
     }
@@ -49,7 +54,7 @@ void ofFace::update() {
     else if (tween > 1.0) tween = 1.0f;
     
     tweenStep += tweenStep / 2;
-    center = ofPoint(x,y);
+        //center = ofPoint(x,y);
     age += 1;
 }
 
@@ -69,13 +74,12 @@ void ofFace::scaleToMap(ofImage * map) {
     if(map->getPixelsRef().size() < 5) return;
 
     if(index < map->getPixelsRef().size()) {
-        int color = map->getPixelsRef()[index];
-            //        color += map->getPixelsRef()[index+1];
-            //        color += map->getPixelsRef()[index+2];
-        //ofLog() << "The color is " << color;
+        int color = map->getPixelsRef()[index*3];
         scale = color / (255);
     }
     if(scale == 0) scale = 0.1;
+        //    scale = loc.squareDistance(spawnPoint);
+        //    ofLog() << "scale: " << ofToString(scale);
 }
 
 float ofFace::getRadius() {

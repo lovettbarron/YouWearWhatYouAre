@@ -3,6 +3,7 @@
 
 #include "ofMain.h"
 #include "face.h"
+#include "ofxCv.h"
 
 class ofCanvas {
     
@@ -34,6 +35,7 @@ public:
     int height;
     int cx;
     int cy;
+    ofVec3f center;
     float scale;
     int size();
     bool bActive;
@@ -50,6 +52,6 @@ private:
     void pack();
     float distance(ofFace & face1, ofFace & face2);
     float distance(ofPoint pt1, ofPoint pt2);
-    bool compare(ofFace* face1, ofFace* face2);
+        //bool compare(ofFace* face1, ofFace* face2);
 };
 #endif

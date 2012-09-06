@@ -30,9 +30,7 @@ void testApp::setup() {
     ofBackground(0);
     
         // Allocate and setup openCV methods
-    cam.initGrabber(640, 480);
-    thresh.allocate(640, 480, OF_IMAGE_GRAYSCALE);
-    bgThresh.allocate(640,480,OF_IMAGE_GRAYSCALE);
+    cam.initGrabber(320, 240);
     scaleFactor = panel.getValueF("faceScale");
     classifier.load(ofToDataPath("haarcascade_frontalface_alt2.xml"));
     graySmall.allocate(cam.getWidth() * scaleFactor, cam.getHeight() * scaleFactor, OF_IMAGE_GRAYSCALE);
@@ -436,6 +434,7 @@ void testApp::updateCamera() {
         }
         
         newFrame.setFromPixels(cam.getPixels(), cam.width, cam.height, OF_IMAGE_COLOR);
+            //resize(gray, graySmall);
         
     }
 }

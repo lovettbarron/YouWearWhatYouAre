@@ -9,17 +9,20 @@ ofCanvas::ofCanvas(ofVec3f _pos, ofImage _map, ofPolyline _border)
 //    std::memcpy(&map,&_map,sizeof *map);
     pos = _pos;
     border = _border;
-    map = _map;
+    border.simplify(.3);    
+    border.close();
+    ofxCv::convertColor(_map, map, CV_RGB2GRAY) ;
     width = map.width;
     height = map.height;
     cx = width/2;
     cy = height/2;
+    center = ofVec3f(cx,cy,0);
     padding = 0.1;
     newFaceTimer = 0;
     debug = false;
     scale  = 2.0;
-    limit = 50;
-    newFaceTimerThresh = 30;
+    limit = 100;
+    newFaceTimerThresh = 60;
         //frame.allocate(width, height, GL_RGBA);
  }
 
@@ -52,17 +55,18 @@ void ofCanvas::drawBoundingLines() {
         glPopMatrix();
     }
 }
-
-bool ofCanvas::compare(ofFace* face1, ofFace* face2) {    
-    ofVec3f * center = new ofVec3f(cx,cy,0);
-    float d1 = face1->distance(*center);
-    float d2 = face2->distance(*center);
-    if (d1 < d2)
-        return 1;
-    else if (d1 > d2)
-        return -1;
-    else return 0;
-}
+//struct compare: public ofCanvas {
+//    bool operator ()(ofFace& face1, ofFace& face2) const {    
+//        ofVec3f * center = new ofVec3f(cx,cy,0);
+//        float d1 = face1.distance(*center);
+//        float d2 = face2.distance(*center);
+//        if (d1 < d2)
+//            return 1;
+//        else if (d1 > d2)
+//            return -1;
+//        else return 0;
+//    }
+//};
 
 bool ofCanvas::compareWithStillActive( ofImage * _img, ofVec3f * _loc) {
     for(int i=0;i<canvas.size();i++){
@@ -83,7 +87,9 @@ void ofCanvas::update() {
     checkSize();
         // std::sort(canvas.begin(), canvas.end(), &compare);
     newFaceTimer--;
-    int offsetx=0;
+
+// This is just a test thing
+    /* int offsetx=0;
     int offsety=0;
     int maxHeight=0;
     for(int i=0;i<canvas.size();i++) {
@@ -92,16 +98,17 @@ void ofCanvas::update() {
         canvas[i].x = offsetx;
         canvas[i].y = offsety;
         canvas[i].scaleToMap(&map);
-        offsetx += canvas[i].radius*2;
-        if(maxHeight<canvas[i].radius*2) maxHeight = canvas[i].radius*2;
+        offsetx += canvas[i].radius;
+        if(maxHeight<canvas[i].radius) maxHeight = canvas[i].radius;
         if(offsetx>width) {
             offsetx=0;
             offsety+=maxHeight;
             maxHeight=0;
         }
-    }
+    } */
     
-    /*
+    sort(canvas.begin(), canvas.end());
+    
     if(canvas.size() != 0) {
         float sepSq = .4 * .4;
         for (int i = 0; i < canvas.size() - 1; i++)
@@ -127,7 +134,8 @@ void ofCanvas::update() {
                 float minSepSq = ofClamp(d, 0, sepSq);
                 d -= minSepSq;
                 bool succeed;
-                float forceFromCenter = (canvas[i].distance(*new ofVec3f(cx,cy,0)) / (width/2));
+                float forceFromCenter = 1;//(canvas[i].distance(*new ofVec3f(cx,cy,0)) / (width/2));
+                                          //ofLog() << "Force: " << ofToString(forceFromCenter);
                 if (d < (r * r) - 0.01 )
                 {
                     AB.normalize();
@@ -138,22 +146,20 @@ void ofCanvas::update() {
                     int bx = canvas[i].x - AB.x;
                     int by = canvas[i].y - AB.y;
                     // Checks if the face is within the polyLine
-                    if(border.inside(ax, ay)) { // && border.inside(ax-r, ay-r)
-                        canvas[j].x += AB.x;
-                        canvas[j].y += AB.y;
-                        succeed = true;
+                    if(border.inside(ax+r, ay+r)) { // && border.inside(ax-r, ay-r)
+                        if(border.inside(ax-r, ay-r)) {
+                            canvas[j].loc += AB;
+                            succeed = true;
+                        }
                     } else {
-                        canvas[j].x -= AB.x*forceFromCenter;
-                        canvas[j].y -= AB.y*forceFromCenter;
                         succeed = false;
                     }
-                    if(border.inside(bx,by)) { // && border.inside(bx-r, by-r)
-                        canvas[i].x -= AB.x;
-                        canvas[i].y -= AB.y;
-                        succeed = true;
+                    if(border.inside(bx+r,by+r)) { // && border.inside(bx-r, by-r)
+                        if(border.inside(bx-r, by-r)) {
+                            canvas[i].loc -= AB;
+                            succeed = true;
+                        }
                     } else {
-                        canvas[i].x += AB.x*forceFromCenter;
-                        canvas[i].y += AB.y*forceFromCenter;
                         succeed = false;
                     }
                     
@@ -161,7 +167,55 @@ void ofCanvas::update() {
                 // This pulls these guys closer to the center
             }
          }
-    }*/
+    }
+    
+    for (int i = 0; i < canvas.size(); i++) {
+        canvas[i].loc;
+        ofVec3f diff;
+        diff = canvas[i].loc - center;
+        diff *= 0.1;
+        canvas[i].x -= diff.x;
+        canvas[i].x -= diff.y;
+    }
+    
+        // Processing implementation of circle packing. Expansion and cont
+    /*
+    SuperCell cellK, cellJ;
+    PVector force = new PVector();
+        // CHECK AGAINST ALL MEMBERS OF POPULATION
+    for (int k = 0; k < cells.length; k++) {
+        cellK = (SuperCell)cells[k];
+        for (int j=k+1; j < cells.length; j++) {
+            if (k != j) {
+                cellJ = (SuperCell)cells[j];
+                PVector diff = PVector.sub(cellJ.pos, cellK.pos);
+                float r = cellJ.cellRadius + cellK.cellRadius;
+                float d = (diff.x*diff.x) + (diff.y*diff.y) + (diff.z*diff.z);
+                
+                    // APPLY FORCE IF REQUIRED
+                if (d < (r * r) - 0.01 ){
+                    force = diff.get();
+                    force.normalize();
+                    force.mult((r-sqrt(d))*0.5);           
+                    cellJ.pos.add(force);  // PULL        
+                    cellK.pos.sub(force);  // PUSH
+                }          
+            }
+        }
+    }
+    
+        //----------------------------- POPULATION CONTRACTION
+    float damping = 0.1/(float)(iterationCounter);
+    for (int i = 0; i < cells.length; i++) {
+        SuperCell tmpCell = (SuperCell)cells[i];
+        PVector diff = tmpCell.vectorToCenter();
+        diff.mult(damping);
+        force = diff.get();
+        tmpCell.pos.sub(force);
+    }
+}*/
+    
+    
     
     // Draw to FBO
 //    frame.begin();
@@ -200,6 +254,23 @@ void ofCanvas::draw(int _x, int _y) {
     
         //    ofDisableAlphaBlending();
     ofPopMatrix();
+    
+    if(debug) {
+        ofPushMatrix();
+        ofTranslate(0,0,0.0f);
+        ofScale(0.6,0.6);
+        string stats;
+        stats = "pos: " + ofToString(pos);
+        ofDrawBitmapString(stats,0, 0);
+        stats = "width: " + ofToString(width) + " height: " + ofToString(height);
+        ofDrawBitmapString(stats,0, 12);
+        stats = "faces: " + ofToString(canvas.size());
+        ofDrawBitmapString(stats,0, 24);
+        stats = "cx: " + ofToString(center.x) + " cy: " + ofToString(center.y);
+        ofDrawBitmapString(stats,0, 36);
+        ofPopMatrix();
+    }
+    
 }
 
 void ofCanvas::draw() {
