@@ -3,26 +3,6 @@
 using namespace ofxCv;
 using namespace cv;
 
-//
-//testApp::testApp()
-//{    
-//    isConfigHomograph = false; // If currently configuring transform
-//    saveMatrix = false;
-//    loadMatrix = false;
-//    matrixReady = false;
-//    movingPoint = false;
-//    saveImage = false;
-//    scaleFactor = 1.0;
-//        //ofCanvas tempCanvas;
-//    vector<ofFace*> faces;
-//    vector<ofCanvas*> canvases;
-//    canvases = *new vector<ofCanvas*>;
-//}
-//
-//testApp::~testApp() 
-//{
-//    
-//}
 
 void testApp::setup() {
     setupType();
@@ -323,10 +303,6 @@ void testApp::updateConditional() {
     if(panel.getValueB("debug")) setDebug(true);
     else setDebug(false);
     
-    if(panel.getValueB("resetFaces")) {
-        faces.clear();
-        panel.setValueB("resetFaces",false);
-    }
     if(panel.getValueB("add100Faces")) {
         for(int i=0;i<canvases.size();i++) {
             canvases[i]->testImages();

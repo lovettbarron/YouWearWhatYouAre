@@ -117,8 +117,9 @@ bool ofFace::isWithinRange(ofVec3f & _difference) {
 void ofFace::draw(int _x, int _y) {
     glEnable(GL_DEPTH_TEST);
 
-    glPushMatrix();  
-        glTranslatef(_x,_y,0.0f);
+    glPushMatrix();
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
+        glTranslatef(_x,_y,0.1f);
         glColor4f(1.0f,1.0f,1.0f,1.0f);
         theFace.reloadTexture();
         theFace.bind();  
@@ -132,11 +133,13 @@ void ofFace::draw(int _x, int _y) {
     
     if(bActive) {
         glBegin(GL_POLYGON);
+        glTranslatef(_x,_y,0.0);
         glColor4f(1.0,0,0,.7);
         for(int i = 0; i < circle.size(); i++){  
             if( i > circle.size() * (1-inactiveTimer)) glColor3f(0,0,0);
             glVertex2f( circle[i].x * (radius*tween+2)*scale,  circle[i].y * (radius*tween+2)*scale);  
         }
+        glColor4f(1.0f,1.0f,1.0f,1.0f);
         glEnd();
     }
     

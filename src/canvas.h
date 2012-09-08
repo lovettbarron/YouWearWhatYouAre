@@ -13,6 +13,7 @@ public:
     ~ofCanvas();
     
     ofBaseApp * app;
+    ofShader shader;
     
     void update();
     void draw(int _x, int _y);

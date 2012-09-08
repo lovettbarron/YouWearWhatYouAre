@@ -24,7 +24,9 @@ ofCanvas::ofCanvas(ofBaseApp * base, ofVec3f _pos, ofImage _map, ofPolyline _bor
     limit = 100;
     newFaceTimerThresh = 60;
     app = base;
-        //frame.allocate(width, height, GL_RGBA);
+    frame.allocate(width * 4, height *4, GL_RGBA, 3);
+    ofLog() << "Frame w: " << ofToString(width*4) << " h: " << ofToString(height*4);
+    shader.load("2dblur.glsl"); // assumes the shaders are in /data
  }
 
 ofCanvas::~ofCanvas() 
@@ -138,43 +140,72 @@ void ofCanvas::update() {
         canvas[i].x -= diff.y;
     }
     
-     
-    // Draw to FBO
-//    frame.begin();
-//    glClear(GL_COLOR_BUFFER_BIT);
-//    glPushAttrib(GL_ALL_ATTRIB_BITS);
-//    
-//    glEnable(GL_BLEND);
-//    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,GL_ONE,GL_ONE_MINUS_SRC_ALPHA);
-//    map.draw(0,0);
-//    for(int i=0;i<canvas.size();i++) {
-//        canvas[i].draw();
-//    }
-//    border.draw();
-//    glDisable(GL_BLEND);
-//    glPopAttrib();
-//    frame.end();
 }
 
 void ofCanvas::draw(int _x, int _y) {
-    ofPushMatrix();
     
-    ofScale(scale,scale);
-        //    ofScale(.4,.4);
-    ofEnableAlphaBlending();
-        //    frame.draw(0,0);
+    // Draw to FBO
+    frame.begin();
+    ofClear(0,0,0);  
+//    glPushAttrib(GL_ALL_ATTRIB_BITS);
+//    
+//    glEnable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+        //    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,GL_ONE,GL_ONE_MINUS_SRC_ALPHA);
     if(debug) {
         map.reloadTexture();
         map.draw(0,0);
+        drawBoundingLines();
     }
     for(int i=0;i<canvas.size();i++) {
         canvas[i].draw();
     }
-    if(debug) {
-        drawBoundingLines();
-    }
+
+
+    ofClearAlpha();  
+    frame.end();
     
-    ofDisableAlphaBlending();
+    shader.begin();
+        // the fbo contains two textures, so we blur one
+        // then copy it to the other and repeat 8 times
+    for(int i=0; i<8; i++) {
+        int srcPos = i % 2;             // attachment to write to
+        int dstPos = 1 - srcPos;        // attachment to read from
+        glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT + dstPos);    // write to this texture
+        ofClear(0, 0, 0, 0);
+        
+        shader.setUniform1i("tex0", 0);
+        shader.setUniform1f("sampleOffset", i*2+1);
+        frame.getTextureReference(srcPos).draw(0, 0);
+    }
+    shader.end();
+    
+    
+    
+    ofPushMatrix();
+    
+    ofScale(scale,scale);
+        //    ofScale(.4,.4);
+        //ofEnableAlphaBlending();
+    
+    
+    glEnable(GL_BLEND);  
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);  
+    frame.draw(0,0);
+    glDisable(GL_BLEND);  
+
+//    if(debug) {
+//        map.reloadTexture();
+//        map.draw(0,0);
+//    }
+   /* for(int i=0;i<canvas.size();i++) {
+        canvas[i].draw();
+    }*/
+   /* if(debug) {
+        drawBoundingLines();
+    }*/
+    
+        // ofDisableAlphaBlending();
     ofPopMatrix();
     
     if(debug) {
