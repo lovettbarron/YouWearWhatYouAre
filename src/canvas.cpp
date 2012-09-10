@@ -1,19 +1,29 @@
 #include "ofMain.h"
 #include "canvas.h"
 
-ofCanvas::ofCanvas(ofBaseApp * base, ofVec3f _pos, ofImage _map, ofPolyline _border)
+using namespace ofxCv;
+using namespace cv;
+
+ofCanvas::ofCanvas(ofBaseApp * base, ofVec3f _pos, ofImage _map)
 {
     ofLog() << "'Lo, a new canvas is born";
 //    std::memcpy(&pos,&_pos,sizeof *pos);
 //    std::memcpy(&border,&_border,sizeof *border);
 //    std::memcpy(&map,&_map,sizeof *map);
+    frameScale = 2;
+    ofxCv::convertColor(_map, map, CV_RGB2GRAY) ;
+    width = map.width * frameScale;
+    height = map.height * frameScale;
     pos = _pos;
-    border = _border;
+    border = getContour(_map);
     border.simplify(.3);    
     border.close();
-    ofxCv::convertColor(_map, map, CV_RGB2GRAY) ;
-    width = map.width;
-    height = map.height;
+    
+    for(int i=0;i<border.size();i++) {
+        border[i].x *= frameScale;
+        border[i].y *= frameScale;
+    }
+    
     cx = width/2;
     cy = height/2;
     center = ofVec3f(cx,cy,0);
@@ -24,14 +34,40 @@ ofCanvas::ofCanvas(ofBaseApp * base, ofVec3f _pos, ofImage _map, ofPolyline _bor
     limit = 100;
     newFaceTimerThresh = 60;
     app = base;
-    frame.allocate(width * 4, height *4, GL_RGBA, 3);
-    ofLog() << "Frame w: " << ofToString(width*4) << " h: " << ofToString(height*4);
-    shader.load("2dblur.glsl"); // assumes the shaders are in /data
+    frame.allocate(width, height, GL_RGBA, 1);
+    ofLog() << "Frame w: " << ofToString(width) << " h: " << ofToString(height);
+    shader.load("shader"); //plzplzplz don'tcrash
  }
 
 ofCanvas::~ofCanvas() 
 {
     
+}
+
+ofPolyline ofCanvas::getContour(ofImage map) {
+    ofPolyline poly;
+    ofImage mapResized;
+    mapResized.allocate(width,height,OF_IMAGE_COLOR);
+    resize(map, mapResized);
+    contourFinder.setTargetColor(ofColor(0,255,0), TRACK_COLOR_RGB);
+    contourFinder.setInvert(true);
+    contourFinder.setThreshold(127);
+    contourFinder.findContours(toCv(mapResized));
+    
+    ofLog() << "Number of polylines: " << ofToString(contourFinder.size());
+    
+    if(contourFinder.size() != 0 ) {
+        vector<ofPolyline> polylines;
+        polylines = contourFinder.getPolylines();
+        for(int i=0; i<polylines.size(); i++) {
+            ofLog() << "Polyline" << ofToString(i) << " has " << ofToString(polylines[i].size());
+            if(i==0) poly = polylines[i];
+            if(polylines[i].size() >= poly.size()) poly = polylines[i];
+        }
+        ofLog() << "Found contours: " << ofToString(poly.size());
+    } 
+    
+    return poly;
 }
 
 //Translated from http://www.openprocessing.org/sketch/57395
@@ -146,72 +182,40 @@ void ofCanvas::draw(int _x, int _y) {
     
     // Draw to FBO
     frame.begin();
-    ofClear(0,0,0);  
-//    glPushAttrib(GL_ALL_ATTRIB_BITS);
-//    
-//    glEnable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
-        //    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,GL_ONE,GL_ONE_MINUS_SRC_ALPHA);
-    if(debug) {
-        map.reloadTexture();
-        map.draw(0,0);
-        drawBoundingLines();
-    }
-    for(int i=0;i<canvas.size();i++) {
-        canvas[i].draw();
-    }
-
-
-    ofClearAlpha();  
-    frame.end();
-    
-    shader.begin();
-        // the fbo contains two textures, so we blur one
-        // then copy it to the other and repeat 8 times
-    for(int i=0; i<8; i++) {
-        int srcPos = i % 2;             // attachment to write to
-        int dstPos = 1 - srcPos;        // attachment to read from
-        glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT + dstPos);    // write to this texture
-        ofClear(0, 0, 0, 0);
+        ofPushMatrix();
+            ofClear(0,0,0);  
+            glDisable(GL_DEPTH_TEST);
         
-        shader.setUniform1i("tex0", 0);
-        shader.setUniform1f("sampleOffset", i*2+1);
-        frame.getTextureReference(srcPos).draw(0, 0);
-    }
-    shader.end();
-    
-    
-    
-    ofPushMatrix();
-    
-    ofScale(scale,scale);
+            if(debug) {
+                map.reloadTexture();
+                map.draw(0,0,width,height);
+                drawBoundingLines();
+            }
+        
+            shader.begin();
+                ofScale(frameScale,frameScale);
+                for(int i=0;i<canvas.size();i++) {
+                    canvas[i].draw();
+                }
+            shader.end();
+
+            ofClearAlpha();
+        ofPopMatrix();
+    frame.end();
         //    ofScale(.4,.4);
         //ofEnableAlphaBlending();
-    
-    
-    glEnable(GL_BLEND);  
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);  
-    frame.draw(0,0);
-    glDisable(GL_BLEND);  
-
-//    if(debug) {
-//        map.reloadTexture();
-//        map.draw(0,0);
-//    }
-   /* for(int i=0;i<canvas.size();i++) {
-        canvas[i].draw();
-    }*/
-   /* if(debug) {
-        drawBoundingLines();
-    }*/
-    
-        // ofDisableAlphaBlending();
+    ofPushMatrix();
+        ofScale(scale,scale);
+        glEnable(GL_BLEND);  
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);  
+        frame.draw(0,0);
+        glDisable(GL_BLEND);  
     ofPopMatrix();
     
     if(debug) {
         ofPushMatrix();
         ofTranslate(0,0,0.0f);
-        ofScale(0.6,0.6);
+            //ofScale(0.6,0.6);
         string stats;
         stats = "pos: " + ofToString(pos);
         ofDrawBitmapString(stats,0, 0);

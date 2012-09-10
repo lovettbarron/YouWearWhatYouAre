@@ -42,9 +42,7 @@ public:
     int numberOfCanvases();
     void updateConditional();
     void setDebug(bool _debug);
-        //Add uses contour finder to gen the poly line
     void add(ofVec3f _pos, ofImage _map);
-    ofxCv::ContourFinder contourFinder;
     
     void saveHomography();
     bool loadHomography( string * path );
@@ -107,6 +105,7 @@ public:
     ofPolyline getContour(ofImage * map);
     void delegateToCanvas(ofImage _face, int x, int y, int w, int h);
     int faceSmoothing;
+    int panX, panY;
     
     
     

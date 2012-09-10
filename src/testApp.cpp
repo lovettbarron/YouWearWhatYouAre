@@ -41,34 +41,8 @@ void testApp::setup() {
  *******************************************/
     // Add a canvas to the vector from image and position.
 void testApp::add(ofVec3f _pos, ofImage _map) {
-    canvases.push_back( new ofCanvas( this, ofVec3f(0,0,0), _map, getContour(&_map)) );
+    canvases.push_back( new ofCanvas( this, ofVec3f(0,0,0), _map) );
     ofLog() << "Canvases added, size " << ofToString(canvases.size());
-}
-
-ofPolyline testApp::getContour(ofImage * map) {
-    ofPolyline poly;
-        //    ofImage * mapCopy = new ofImage;
-        //    mapCopy->clone(*map);
-        //    mapCopy->allocate(map->width, map->height, OF_IMAGE_GRAYSCALE);
-    contourFinder.setTargetColor(ofColor(0,255,0), TRACK_COLOR_RGB);
-    contourFinder.setInvert(true);
-    contourFinder.setThreshold(127);
-    contourFinder.findContours(toCv(*map));
-    
-    ofLog() << "Number of polylines: " << ofToString(contourFinder.size());
-    
-    if(contourFinder.size() != 0 ) {
-        vector<ofPolyline> polylines;
-        polylines = contourFinder.getPolylines();
-        for(int i=0; i<polylines.size(); i++) {
-            ofLog() << "Polyline" << ofToString(i) << " has " << ofToString(polylines[i].size());
-            if(i==0) poly = polylines[i];
-            if(polylines[i].size() >= poly.size()) poly = polylines[i];
-        }
-        ofLog() << "Found contours: " << ofToString(poly.size());
-    } 
-    
-    return poly;
 }
 
 
@@ -135,7 +109,7 @@ void testApp::delegateToCanvas(ofImage _face, int x, int y, int w, int h) {
                                 , ofVec3f(x + (w/2), y + (h/2),0)
                                 ,ofVec3f(canvases[index]->cx+ofRandom(-5,5)
                                 ,canvases[index]->cy+ofRandom(-5,5),0)
-                                ,20);
+                                ,20*4);
         
         canvases[index]->canvas.push_back( theFace );
     }
@@ -146,33 +120,32 @@ void testApp::delegateToCanvas(ofImage _face, int x, int y, int w, int h) {
  *******************************************/
 
 void testApp::draw() {
-    
+        //    ofBackground(1.0,1.0,1.0);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.5);
-    if(debug) {
-        ofPushMatrix();
-        ofNoFill();
-        ofTranslate(ofGetWidth()-cam.width,0);
-        cam.draw(0,0);
-        thresh.draw(0,cam.height);
-        ofScale(1 / scaleFactor, 1 / scaleFactor);
-        for(int i = 0; i < objects.size(); i++) {
-            ofLog() << "Drawing face #" << ofToString(i);
-            ofRect(toOf(objects[i]));
-        }
-        ofPopMatrix();
-    }
-
     ofPushMatrix();
-    ofScale(panel.getValueF("scaleWindow"),panel.getValueF("scaleWindow"));
-    for(int i=0; i<canvases.size(); i++) {
-        if(i!=0) ofTranslate(canvases[i-1]->width*2);
-        canvases[i]->draw();
-            //        ofLog() << "Drawing canvases" << ofToString(i);
-    }
+        ofTranslate(panX,panY);
+        ofScale(panel.getValueF("scaleWindow"),panel.getValueF("scaleWindow"));
+        for(int i=0; i<canvases.size(); i++) {
+            if(i!=0) ofTranslate(canvases[i-1]->width*2);
+            canvases[i]->draw();
+        }
     ofPopMatrix();
     
+    if(debug) {
+        ofPushMatrix();
+            ofNoFill();
+            ofTranslate(ofGetWidth()-cam.width,0);
+            cam.draw(0,0);
+            graySmall.draw(0,cam.height);
+            ofScale(1 / scaleFactor, 1 / scaleFactor);
+            for(int i = 0; i < objects.size(); i++) {
+                    //ofLog() << "Drawing face #" << ofToString(i);
+                ofRect(toOf(objects[i]));
+            }
+        ofPopMatrix();
+    }
        
     GLboolean isDepthTesting;
     glGetBooleanv(GL_DEPTH_TEST, &isDepthTesting);
@@ -300,6 +273,9 @@ void testApp::updateConditional() {
     
     scaleFactor = panel.getValueF("faceScale");
     
+    panX = panel.getValueF("panX");
+    panY = panel.getValueF("panY");
+    
     if(panel.getValueB("debug")) setDebug(true);
     else setDebug(false);
     
@@ -339,7 +315,7 @@ void testApp::setupPanel() {
     panel.addToggle("debug",false);
     
     panel.addLabel("Main Window");
-    panel.addSlider("scaleWindow", 1.0, 0.05, 2.0, false);
+    panel.addSlider("scaleWindow", 1.0, 0.005, 1.0, false);
     panel.addSlider("scaleTop", 1.0, 0.05, 1.0, false);
     panel.addSlider("scaleBottom", 1.0, 0.05, 1.0, false);
     panel.addLabel("Image Processing");
@@ -359,6 +335,10 @@ void testApp::setupPanel() {
     panel.addSlider("makeInactive", 30, 1, 120, true);
     panel.addSlider("faceDetectSmothing", 64, 1, 128, true);
     panel.addSlider("distanceThresh",15,1,100,true);    
+    
+    panel.addPanel("Screen Move");
+    panel.addSlider("panX", 0, -1000, 1000, true);
+    panel.addSlider("panY", 0, -1000, 1000, true);
 }
 
 void testApp::setupType() {
@@ -373,16 +353,18 @@ void testApp::setupType() {
 void testApp::updateCamera() {
     cam.update();
     if(cam.isFrameNew()) {
-        background.update(cam, thresh);
-        thresh.update();
+            //        background.update(cam, thresh);
+//        thresh.update();
         
-            //        convertColor(thresh, gray, CV_GRA //CV_RGB2GRAY);
-        resize(thresh, graySmall);
-        Mat graySmallMat = toCv(graySmall);
-        if(ofGetMousePressed()) {
-            equalizeHist(graySmallMat, graySmallMat);
-        }
+        convertColor(cam, gray, CV_RGB2GRAY);//CV_RGB2GRAY);
+        resize(gray, graySmall);
         graySmall.update();
+        Mat graySmallMat = toCv(graySmall);
+        equalizeHist(graySmallMat, graySmallMat);
+        //        if(ofGetMousePressed()) {
+        //            equalizeHist(graySmallMat, graySmallMat);
+        //        }
+        //imitate(graySmallMat, graySmall);
         
         classifier.detectMultiScale(
                                     graySmallMat

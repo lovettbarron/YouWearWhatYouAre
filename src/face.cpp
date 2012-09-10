@@ -9,7 +9,6 @@ ofFace::ofFace(ofImage _face, ofVec3f _faceLocation, ofVec3f _circleLoc, int _ar
     y = _circleLoc.y;
     loc = _circleLoc;
     area = _area;
-    
         //    x = ofRandom(0,ofGetWidth());
         //    y = ofRandom(0,ofGetHeight());
     radius = ofRandom(area*.1,area);

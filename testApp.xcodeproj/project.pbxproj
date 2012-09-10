@@ -21,7 +21,8 @@
 		839B3CD4157D3C5E00D3335A /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 839B3CCE157D3C5E00D3335A /* tinyxmlerror.cpp */; };
 		839B3CD5157D3C5E00D3335A /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 839B3CCF157D3C5E00D3335A /* tinyxmlparser.cpp */; };
 		839B3CD6157D3C5E00D3335A /* ofxXmlSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 839B3CD1157D3C5E00D3335A /* ofxXmlSettings.cpp */; };
-		83ACF13715FB9E60002876D7 /* 2dblur.glsl in Sources */ = {isa = PBXBuildFile; fileRef = 83ACF13615FB9E60002876D7 /* 2dblur.glsl */; };
+		83ACF13715FB9E60002876D7 /* shader.frag in Sources */ = {isa = PBXBuildFile; fileRef = 83ACF13615FB9E60002876D7 /* shader.frag */; };
+		83ACF14215FBA98B002876D7 /* shader.vert in Sources */ = {isa = PBXBuildFile; fileRef = 83ACF14115FBA98B002876D7 /* shader.vert */; };
 		83DF25EF15841B3D00807004 /* guiBaseObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83DF25B415841B3C00807004 /* guiBaseObject.cpp */; };
 		83DF25F015841B3D00807004 /* guiCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83DF25B615841B3C00807004 /* guiCallback.cpp */; };
 		83DF25F115841B3D00807004 /* guiCallbackValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83DF25B815841B3C00807004 /* guiCallbackValue.cpp */; };
@@ -144,7 +145,8 @@
 		839B3CCF157D3C5E00D3335A /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxmlparser.cpp; sourceTree = "<group>"; };
 		839B3CD1157D3C5E00D3335A /* ofxXmlSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxXmlSettings.cpp; sourceTree = "<group>"; };
 		839B3CD2157D3C5E00D3335A /* ofxXmlSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxXmlSettings.h; sourceTree = "<group>"; };
-		83ACF13615FB9E60002876D7 /* 2dblur.glsl */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = 2dblur.glsl; sourceTree = "<group>"; };
+		83ACF13615FB9E60002876D7 /* shader.frag */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = shader.frag; sourceTree = "<group>"; };
+		83ACF14115FBA98B002876D7 /* shader.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = shader.vert; sourceTree = "<group>"; };
 		83DF25B415841B3C00807004 /* guiBaseObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = guiBaseObject.cpp; sourceTree = "<group>"; };
 		83DF25B515841B3C00807004 /* guiBaseObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = guiBaseObject.h; sourceTree = "<group>"; };
 		83DF25B615841B3C00807004 /* guiCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = guiCallback.cpp; sourceTree = "<group>"; };
@@ -495,7 +497,8 @@
 				83ED9B0D15ECFFFF004B584F /* File.cpp */,
 				83EFA24C15C6CF810008E6EF /* Raleway-Thin.ttf */,
 				83EFA24D15C6CF810008E6EF /* settings.xml */,
-				83ACF13615FB9E60002876D7 /* 2dblur.glsl */,
+				83ACF13615FB9E60002876D7 /* shader.frag */,
+				83ACF14115FBA98B002876D7 /* shader.vert */,
 			);
 			name = data;
 			path = bin/data;
@@ -721,7 +724,8 @@
 				83ED9B0E15ECFFFF004B584F /* File.cpp in Sources */,
 				83ED9B1C15EDC0CF004B584F /* face.cpp in Sources */,
 				83ED9B1F15EDD561004B584F /* canvas.cpp in Sources */,
-				83ACF13715FB9E60002876D7 /* 2dblur.glsl in Sources */,
+				83ACF13715FB9E60002876D7 /* shader.frag in Sources */,
+				83ACF14215FBA98B002876D7 /* shader.vert in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

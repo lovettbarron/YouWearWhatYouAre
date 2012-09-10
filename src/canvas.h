@@ -9,7 +9,7 @@ class ofCanvas {
     
 public:
     
-    ofCanvas(ofBaseApp * base,ofVec3f _pos, ofImage _map, ofPolyline _border);
+    ofCanvas(ofBaseApp * base,ofVec3f _pos, ofImage _map);
     ~ofCanvas();
     
     ofBaseApp * app;
@@ -20,6 +20,8 @@ public:
     void draw();
     void reset();
     void configure();
+    ofPolyline getContour(ofImage map);
+    ofxCv::ContourFinder contourFinder;
     void select();
     void deselect();
     bool selected;
@@ -28,6 +30,7 @@ public:
     bool debug;
     void checkSize();
     int limit;
+    int frameScale;
     ofVec3f mouse;
     ofVec3f pos;
     ofFbo frame;
