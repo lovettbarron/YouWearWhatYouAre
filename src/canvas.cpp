@@ -10,7 +10,7 @@ ofCanvas::ofCanvas(ofBaseApp * base, ofVec3f _pos, ofImage _map)
 //    std::memcpy(&pos,&_pos,sizeof *pos);
 //    std::memcpy(&border,&_border,sizeof *border);
 //    std::memcpy(&map,&_map,sizeof *map);
-    frameScale = 2;
+    frameScale = 4;
     ofxCv::convertColor(_map, map, CV_RGB2GRAY) ;
     width = map.width * frameScale;
     height = map.height * frameScale;
@@ -46,13 +46,13 @@ ofCanvas::~ofCanvas()
 
 ofPolyline ofCanvas::getContour(ofImage map) {
     ofPolyline poly;
-    ofImage mapResized;
-    mapResized.allocate(width,height,OF_IMAGE_COLOR);
-    resize(map, mapResized);
+//    ofImage mapResized;
+//    mapResized.allocate(width,height,OF_IMAGE_COLOR);
+//    resize(map, mapResized);
     contourFinder.setTargetColor(ofColor(0,255,0), TRACK_COLOR_RGB);
     contourFinder.setInvert(true);
     contourFinder.setThreshold(127);
-    contourFinder.findContours(toCv(mapResized));
+    contourFinder.findContours(toCv(map));
     
     ofLog() << "Number of polylines: " << ofToString(contourFinder.size());
     
@@ -87,10 +87,10 @@ void ofCanvas::drawBoundingLines() {
             ofSetColor(255, 0, 255);
         }
         glPushMatrix();
-        glTranslatef(cur.x, cur.y, 0);
-        ofRotate(angle);
-        ofLine(0, 0, 0, distance);
-        ofLine(0, 0, distance, 0);
+            glTranslatef(cur.x, cur.y, 0);
+            ofRotate(angle);
+            ofLine(0, 0, 0, distance);
+            ofLine(0, 0, distance, 0);
         glPopMatrix();
     }
 }
@@ -193,7 +193,7 @@ void ofCanvas::draw(int _x, int _y) {
             }
         
             shader.begin();
-                ofScale(frameScale,frameScale);
+            // ofScale(frameScale,frameScale);
                 for(int i=0;i<canvas.size();i++) {
                     canvas[i].draw();
                 }
