@@ -16,8 +16,6 @@ ofCanvas::ofCanvas(ofBaseApp * base, ofVec3f _pos, ofImage _map)
     height = map.height * frameScale;
     pos = _pos;
     border = getContour(_map);
-    border.simplify(.3);    
-    border.close();
     
     for(int i=0;i<border.size();i++) {
         border[i].x *= frameScale;
@@ -66,7 +64,8 @@ ofPolyline ofCanvas::getContour(ofImage map) {
         }
         ofLog() << "Found contours: " << ofToString(poly.size());
     } 
-    
+    poly.simplify(.3);    
+    poly.close();    
     return poly;
 }
 
