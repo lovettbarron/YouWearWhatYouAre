@@ -11,6 +11,7 @@ void testApp::setup() {
     scaleFactor = panel.getValueF("faceScale");
         // Allocate and setup openCV methods
 #ifdef _TWOCAM
+    cam1.listDevices();
     cam1.setDeviceID(2);
     cam1.initGrabber(320, 240);
     cam2.setDeviceID(3);
