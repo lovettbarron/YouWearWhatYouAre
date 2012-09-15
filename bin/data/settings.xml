@@ -1,5 +1,11 @@
+<add100Faces>
+    <val_0>0</val_0>
+</add100Faces>
+<debug>
+    <val_0>1</val_0>
+</debug>
 <scaleWindow>
-    <val_0>1.16583</val_0>
+    <val_0>0.325611</val_0>
 </scaleWindow>
 <scaleTop>
     <val_0>1</val_0>
@@ -8,14 +14,8 @@
     <val_0>1</val_0>
 </scaleBottom>
 <faceScale>
-    <val_0>0.2</val_0>
+    <val_0>0.414167</val_0>
 </faceScale>
-<minAreaRadius>
-    <val_0>7</val_0>
-</minAreaRadius>
-<maxAreaRadius>
-    <val_0>100</val_0>
-</maxAreaRadius>
 <scaleFactor>
     <val_0>1.06</val_0>
 </scaleFactor>
@@ -28,15 +28,6 @@
 <maxSize>
     <val_0>100</val_0>
 </maxSize>
-<resetFaces>
-    <val_0>0</val_0>
-</resetFaces>
-<add100Faces>
-    <val_0>0</val_0>
-</add100Faces>
-<debug>
-    <val_0>1</val_0>
-</debug>
 <circleResolution>
     <val_0>64</val_0>
 </circleResolution>
@@ -52,3 +43,9 @@
 <distanceThresh>
     <val_0>15</val_0>
 </distanceThresh>
+<panX>
+    <val_0>0</val_0>
+</panX>
+<panY>
+    <val_0>0</val_0>
+</panY>

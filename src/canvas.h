@@ -34,6 +34,7 @@ public:
     ofVec3f mouse;
     ofVec3f pos;
     ofFbo frame;
+    ofFbo stage;
     ofImage map;
     ofPolyline border;
     void drawBoundingLines();

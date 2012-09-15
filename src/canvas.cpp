@@ -32,7 +32,8 @@ ofCanvas::ofCanvas(ofBaseApp * base, ofVec3f _pos, ofImage _map)
     limit = 100;
     newFaceTimerThresh = 60;
     app = base;
-    frame.allocate(width, height, GL_RGBA, 1);
+    frame.allocate(width, height, GL_RGBA, 2);
+    stage.allocate(width, height, GL_RGBA, 1);
     ofLog() << "Frame w: " << ofToString(width) << " h: " << ofToString(height);
     shader.load("shader"); //plzplzplz don'tcrash
  }
@@ -182,7 +183,7 @@ void ofCanvas::update() {
 }
 
 void ofCanvas::draw(int _x, int _y) {
-    
+    stage = frame;
     // Draw to FBO
     frame.begin();
         ofPushMatrix();
@@ -194,8 +195,8 @@ void ofCanvas::draw(int _x, int _y) {
                 map.draw(0,0,width,height);
                 drawBoundingLines();
             }
-        
-            shader.begin();
+
+        shader.begin();
             if(active.size() >= 1)
                 shader.setUniform2f("push1", (float)active[0]->loc.x, (float)active[0]->loc.y );
             if(active.size() >= 2)
@@ -205,12 +206,25 @@ void ofCanvas::draw(int _x, int _y) {
             if(active.size() >= 4)
                 shader.setUniform2f("push4", (float)active[3]->loc.x, (float)active[3]->loc.y );
     
+    
+        //            shader.setUniform1i("texture",0);
+        //glUniform1i(glGetUniformLocation(shader.shader, "texture"), GL_TEXTURE0)
+//            shader.setUniformTexture("texture", stage, stage.getTextureReference().getTextureData().textureID);
+//            shader.setUniform1f("width", (float)width);
+//            shader.setUniform1f("height", (float)height);
+//            
+//            shader.setUniform1f("ru", 0.33f); 
+//            shader.setUniform1f("rv", 0.1f);
+//            shader.setUniform1f("k", 0.06f);
+//            shader.setUniform1f("f", 0.25f);
+//            shader.setUniform1f("dampen", 350.0f);
+            
+    
             // ofScale(frameScale,frameScale);
                 for(int i=0;i<canvas.size();i++) {
                     canvas[i].draw();
                 }
-            shader.end();
-
+                   shader.end();
             ofClearAlpha();
         ofPopMatrix();
     frame.end();
