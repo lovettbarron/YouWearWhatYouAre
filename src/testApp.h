@@ -8,6 +8,8 @@
 // instead of being a separate class, but will
 // consider this after
 
+#define _TWOCAM 1
+
 #include "ofMain.h"
 #include "ofxCv.h"
 #include "ofxAutoControlPanel.h"
@@ -79,7 +81,14 @@ public:
     bool debug;
     
     float threshold;
+#ifdef _TWOCAM
+    ofImage cam;
+    ofVideoGrabber cam1;
+    ofVideoGrabber cam2;
+#else
     ofVideoGrabber cam;
+#endif
+    
     cv::Mat currentFrame;
     ofImage newFrame;
     

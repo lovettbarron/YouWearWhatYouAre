@@ -51,6 +51,7 @@ public:
     int newFaceTimer;
     int newFaceTimerThresh;
     vector<ofFace> canvas;
+    vector<ofFace*> active;
     
     float sizeOnMap(ofFace * _face);
     bool compareWithStillActive( ofImage * _img, ofVec3f * _loc);

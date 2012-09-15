@@ -111,6 +111,7 @@ bool ofCanvas::compareWithStillActive( ofImage * _img, ofVec3f * _loc) {
 
 void ofCanvas::update() {
     checkSize();
+    active.clear();
     mouse.x = (app->mouseX + pos.x) * scale;
     mouse.y = (app->mouseY + pos.y) * scale;
         // std::sort(canvas.begin(), canvas.end(), &compare);
@@ -122,6 +123,9 @@ void ofCanvas::update() {
         float sepSq = .4 * .4;
         for (int i = 0; i < canvas.size() - 1; i++)
         {
+            if( canvas[i].isActive() ) {            
+                active.push_back(&canvas[i]);
+            }
             if(mouse.squareDistance(canvas[i].loc) <= canvas[i].radius) {
                 canvas[i].selected = true;
             } else {
@@ -192,6 +196,15 @@ void ofCanvas::draw(int _x, int _y) {
             }
         
             shader.begin();
+            if(active.size() >= 1)
+                shader.setUniform2f("push1", (float)active[0]->loc.x, (float)active[0]->loc.y );
+            if(active.size() >= 2)
+                shader.setUniform2f("push2", (float)active[1]->loc.x, (float)active[1]->loc.y );
+            if(active.size() >= 3)
+                shader.setUniform2f("push3", (float)active[2]->loc.x, (float)active[2]->loc.y );
+            if(active.size() >= 4)
+                shader.setUniform2f("push4", (float)active[3]->loc.x, (float)active[3]->loc.y );
+    
             // ofScale(frameScale,frameScale);
                 for(int i=0;i<canvas.size();i++) {
                     canvas[i].draw();

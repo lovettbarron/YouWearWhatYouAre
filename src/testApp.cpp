@@ -8,12 +8,22 @@ void testApp::setup() {
     setupType();
     setupPanel();
     ofBackground(0);
-    
-        // Allocate and setup openCV methods
-    cam.initGrabber(320, 240);
     scaleFactor = panel.getValueF("faceScale");
-    classifier.load(ofToDataPath("haarcascade_frontalface_alt2.xml"));
+        // Allocate and setup openCV methods
+#ifdef _TWOCAM
+    cam1.setDeviceID(2);
+    cam1.initGrabber(320, 240);
+    cam2.setDeviceID(3);
+    cam2.initGrabber(cam1.getWidth(),cam1.getHeight());
+    
+    cam.allocate(cam1.getWidth()+cam2.getWidth(),cam1.getHeight(), OF_IMAGE_COLOR);
+#else
+    cam.initGrabber(320,240);
+#endif
     graySmall.allocate(cam.getWidth() * scaleFactor, cam.getHeight() * scaleFactor, OF_IMAGE_GRAYSCALE);
+    
+    classifier.load(ofToDataPath("haarcascade_frontalface_alt2.xml"));
+    
     debug = false;
     smoothingCounter = 3;
 
@@ -351,10 +361,38 @@ void testApp::setupType() {
 }
 
 void testApp::updateCamera() {
+#ifdef _TWOCAM
+    cam1.update();
+    cam2.update();
+    if(cam1.isFrameNew()) {
+        for(int x=0;x<cam1.getWidth()-1;x++) {
+            for(int y=0;y<cam1.getHeight()-2;y++) {
+                int index = (x + ( y * cam1.getWidth() ) ) * 3;
+                int index1 = (( x + ( y * cam1.getWidth() ) ) + (y*cam2.getWidth())) *3;
+                    // (( x + (y * cam1.getWidth())) + (y*cam2.getWidth())) * 3;
+                int index2 = (((y+1) * cam1.getWidth()) + (x + ( y * cam2.getWidth()) ) ) * 3;
+                    // (( ( x + cam1.getWidth() ) + cam1.getWidth() ) + ( (y+1) * cam1.getWidth() )) * 3;
+                
+                
+                cam.getPixelsRef()[ index1 ] = cam1.getPixelsRef()[index];
+                cam.getPixelsRef()[ index1+1 ] = cam1.getPixelsRef()[index+1];
+                cam.getPixelsRef()[ index1+2 ] = cam1.getPixelsRef()[index+2];
+                
+                cam.getPixelsRef()[ index2 ] = cam2.getPixelsRef()[index];
+                cam.getPixelsRef()[ index2+1 ] = cam2.getPixelsRef()[index+1];
+                cam.getPixelsRef()[ index2+2 ] = cam2.getPixelsRef()[index+2];
+                
+                
+            }
+        }
+        
+        cam.update();
+
+#else
     cam.update();
     if(cam.isFrameNew()) {
-            //        background.update(cam, thresh);
-//        thresh.update();
+#endif
+               //        for(int
         
         convertColor(cam, gray, CV_RGB2GRAY);//CV_RGB2GRAY);
         resize(gray, graySmall);
@@ -412,7 +450,7 @@ void testApp::updateCamera() {
             smoothedObjects.clear();
         }
         
-        newFrame.setFromPixels(cam.getPixels(), cam.width, cam.height, OF_IMAGE_COLOR);
+        newFrame.setFromPixels(cam.getPixels(), cam.getWidth(), cam.getHeight(), OF_IMAGE_COLOR);
             //resize(gray, graySmall);
         
     }
