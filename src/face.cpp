@@ -20,7 +20,7 @@ ofFace::ofFace(ofImage _face, ofVec3f _faceLocation, ofVec3f _circleLoc, int _ar
     debug = false;
     age = 0;
     tween = 0.0f;
-    tweenStep = 0.01;
+    tweenStep = 0.05;
     selected = false;
     inactiveTimer = 0;
     inactiveTimerStep = 0.05f;

@@ -51,13 +51,13 @@ void main(){
 	
 	//generate some noise values based on vertex position and the time value which comes in from our OF app
 	float noiseAmntX = noise( vec2(-timeValX + pos.x / 1000.0f, 100.0f), 20.0 );
-	float noiseAmntY = noise( vec2(timeValY + pos.y / 1000.0f, pos.x / 2000.0f), 20.0 );
+	float noiseAmntY = noise( vec2(timeValY + pos.y / 1000.0f, pos.x / 2000.0f), 40.0 );
 
 	//generate noise for our blue pixel value
 	float noiseB = noise( vec2(timeValY * 0.25, pos.y / 2000.0f), 20.0 );
 
 	//lets also figure out the distance between the mouse and the vertex and apply a repelling force away from the mouse
-    vec2 d = (((vec2(pos.x, pos.y) - push1) - push2) - push3) - push4;
+    vec2 d = (((vec2(pos.x, pos.y) - push1) + push2) - push3) + push4;
 	float len =  sqrt(d.x*d.x + d.y*d.y);
 	if( len < 300 && len > 0  ){
 		
@@ -87,7 +87,7 @@ void main(){
 
 	//modify our color
 	vec4 col = gl_Color;
-	col.b += noiseB;
+	col.b += noiseB;    
 	
 	gl_FrontColor =  col;	
 }

@@ -13,13 +13,20 @@ void testApp::setup() {
 #ifdef _TWOCAM
     cam1.listDevices();
     cam1.setDeviceID(2);
+    cam1.setDesiredFrameRate(30);
     cam1.initGrabber(320, 240);
+    sleep(1);// Joshua recommended hack re: Macam and multi ps3 eye
+    
+    
     cam2.setDeviceID(3);
+    cam2.setDesiredFrameRate(30);
     cam2.initGrabber(cam1.getWidth(),cam1.getHeight());
+    sleep(1); 
     
     cam.allocate(cam1.getWidth()+cam2.getWidth(),cam1.getHeight(), OF_IMAGE_COLOR);
 #else
     cam.initGrabber(320,240);
+    newFrame.allocate(cam.getWidth(), cam.getHeight(), OF_IMAGE_COLOR);
 #endif
     graySmall.allocate(cam.getWidth() * scaleFactor, cam.getHeight() * scaleFactor, OF_IMAGE_GRAYSCALE);
     
@@ -93,14 +100,23 @@ void testApp::filterFace(cv::Rect * objects) {
     int h = objects->height * (1 / scaleFactor);
     
     // Check to see if it's a previous face location
-    newFace.cropFrom(newFrame, x, y, w, h );
+#ifdef _TWOCAM
+    newFace.cropFrom(cam, x, y, w, h );
+#else
+    newFace.cropFrom(newFrame, x, y, w, h );    
+#endif
     newFace.reloadTexture();
     ofVec3f _loc = ofVec3f(x+w/2, y+h/2,0);
     bool isNew = true;
     for(int i=0;i<canvases.size();i++) {
         // Don't run if false, because a face can only be "new" once
         if(isNew != false)
+            
+#ifdef _TWOCAM
+            isNew = canvases[i]->compareWithStillActive( &cam, &_loc );
+#else
             isNew = canvases[i]->compareWithStillActive( &newFrame, &_loc );
+#endif
     }
     if(isNew) {
         delegateToCanvas(newFace,x,y,w,h);
@@ -138,6 +154,12 @@ void testApp::draw() {
     ofPushMatrix();
         ofTranslate(panX,panY);
         ofScale(panel.getValueF("scaleWindow"),panel.getValueF("scaleWindow"));
+    if(flipv) {
+        ofRotate(180, 1,0,0);
+    }
+    if(fliph) {
+        ofRotate(180,0,1,0);
+    }
         for(int i=0; i<canvases.size(); i++) {
             if(i!=0) ofTranslate(canvases[i-1]->width*2);
             canvases[i]->draw();
@@ -298,6 +320,18 @@ void testApp::updateConditional() {
         panel.setValueB("add100Faces",false);
     }
     
+    if(panel.getValueB("horiz_flip")) {
+        fliph = 1.0;
+    } else {
+        fliph = 0;
+    }
+
+    if(panel.getValueB("vert_flip")) {
+        flipv = 1.0;
+    } else {
+        flipv = 0;
+    }
+    
     if(panel.hasValueChanged("circleResolution")) {
         /*        for(int i=0; canvas1->size(); i++) {
          canvas1->get(i).resolution = panel.getValueI("circleResolution");
@@ -324,6 +358,8 @@ void testApp::setupPanel() {
     panel.addLabel("Debug switches");
     panel.addToggle("add100Faces", false);
     panel.addToggle("debug",false);
+    panel.addToggle("horiz_flip", false);
+    panel.addToggle("vert_flip", false);
     
     panel.addLabel("Main Window");
     panel.addSlider("scaleWindow", 1.0, 0.005, 1.0, false);
@@ -388,7 +424,6 @@ void testApp::updateCamera() {
         }
         
         cam.update();
-
 #else
     cam.update();
     if(cam.isFrameNew()) {
@@ -451,8 +486,9 @@ void testApp::updateCamera() {
             smoothedObjects.clear();
         }
         
+#ifndef _TWOCAM
         newFrame.setFromPixels(cam.getPixels(), cam.getWidth(), cam.getHeight(), OF_IMAGE_COLOR);
-            //resize(gray, graySmall);
+#endif
         
     }
 }
@@ -462,4 +498,14 @@ void testApp::setDebug(bool _debug) {
     for(int i=0;i<canvases.size();i++) {
         canvases[i]->debug = _debug;
     }
+}
+
+void testApp::exit() {
+    // Maybe? Some kind of memory management thing happening here...
+#ifdef _TWOCAM
+    cam1.close();
+    sleep(1);
+    cam2.close();
+    sleep(1);
+#endif
 }

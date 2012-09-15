@@ -183,7 +183,7 @@ void ofCanvas::update() {
 }
 
 void ofCanvas::draw(int _x, int _y) {
-    stage = frame;
+//    stage = frame.getFbo();
     // Draw to FBO
     frame.begin();
         ofPushMatrix();
@@ -207,18 +207,21 @@ void ofCanvas::draw(int _x, int _y) {
                 shader.setUniform2f("push4", (float)active[3]->loc.x, (float)active[3]->loc.y );
     
     
-        //            shader.setUniform1i("texture",0);
+        //            shader.setUniform1i("texture",1);
         //glUniform1i(glGetUniformLocation(shader.shader, "texture"), GL_TEXTURE0)
-//            shader.setUniformTexture("texture", stage, stage.getTextureReference().getTextureData().textureID);
-//            shader.setUniform1f("width", (float)width);
-//            shader.setUniform1f("height", (float)height);
-//            
-//            shader.setUniform1f("ru", 0.33f); 
-//            shader.setUniform1f("rv", 0.1f);
-//            shader.setUniform1f("k", 0.06f);
+//            shader.setUniformTexture("tex", stage.getTextureReference(), stage.getTextureReference().getTextureData().textureID);
+            shader.setUniform1i("tex",0 );   
+            
+            shader.setUniform1f("sigma", 0.33f); 
+            shader.setUniform1f("blurSize", 0.1f);
+            shader.setUniform1f("k", 0.06f);
 //            shader.setUniform1f("f", 0.25f);
 //            shader.setUniform1f("dampen", 350.0f);
-            
+//            
+//            shader.setUniform1f("time", 0.33f); 
+            if(active.size() >= 1)
+                shader.setUniform2f("uv", (float)cx, (float)cy );
+    
     
             // ofScale(frameScale,frameScale);
                 for(int i=0;i<canvas.size();i++) {

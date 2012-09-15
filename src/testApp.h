@@ -8,7 +8,7 @@
 // instead of being a separate class, but will
 // consider this after
 
-#define _TWOCAM 1
+//#define _TWOCAM 1
 
 #include "ofMain.h"
 #include "ofxCv.h"
@@ -26,6 +26,7 @@ public:
     
     void update();
     void draw();
+    void exit();
     
     vector<ofCanvas*> canvases; // Holds canvases
     vector<ofFace*> faces; // Holds ALL ofFace obj
@@ -79,6 +80,8 @@ public:
     
     int panelWidth;
     bool debug;
+    float fliph;
+    float flipv;
     
     float threshold;
 #ifdef _TWOCAM
@@ -87,10 +90,10 @@ public:
     ofVideoGrabber cam2;
 #else
     ofVideoGrabber cam;
+    ofImage newFrame;
 #endif
     
     cv::Mat currentFrame;
-    ofImage newFrame;
     
         //Face tracking stuff
     ofImage gray, graySmall;
