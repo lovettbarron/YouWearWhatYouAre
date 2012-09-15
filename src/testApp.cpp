@@ -43,12 +43,18 @@ void testApp::setup() {
     
     // Make first canvas
     ofImage jacket;
-    jacket.loadImage("test_thresh.jpg");
+    jacket.loadImage("thresh3.jpg");
     jacket.reloadTexture();
     ofVec3f loc = ofVec3f(0,0,0);
     add(loc,jacket);
+    
+    jacket.loadImage("thresh2.jpg");
+    jacket.reloadTexture();
     loc = ofVec3f(jacket.width,0,0);
     add(loc,jacket);
+    
+    jacket.loadImage("thresh1.jpg");
+    jacket.reloadTexture();
     loc = ofVec3f(jacket.width,0,0);
     add(loc,jacket);
 }
