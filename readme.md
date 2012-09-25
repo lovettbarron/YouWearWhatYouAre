@@ -4,10 +4,11 @@ Installation for the Queen West Art Crawl
 Draws heavily from what I learned at Kyle McDonald's intermediate computer vision workshop at Eyeo2012. First major openframeworks project too, so apologies for the absolute spaghetti code.
 
 ### Requires
+```
 ofxCv
 ofxControlPanel (forked from Kyle's autoControlPanel)
 ofxXmlSettings
-
+```
 ### Description
 
 You Wear What You Are is an installation that pulls the viewer into the history of a piece of clothing.
